@@ -1,6 +1,5 @@
 import numpy as np
 from scipy.io import mmread
-from scipy.linalg import solve_triangular
 import scipy.sparse as sparse
 
 # Load Matrix Market format
@@ -9,10 +8,10 @@ def get_other_mat(m:int, n:int):
 		raise ValueError('No matrix so large')
 	sparse_matrix = mmread('../data/cvxbqp1.mtx')
 	sparse_matrix = sparse_matrix.tocsr()
-	sparse.save_npz(f'../data/sparse_{m}_by_{n}_matrix', sparse_matrix)
+	sparse.save_npz(f'../data/csr_{m}_by_{n}_other_mat', sparse_matrix)
 	return sparse_matrix
 
-#save_resonable_mat()
+get_other_mat(32768,330)
 
 def get_C( m:int, n:int ):
 	# compute a 2 d grid, from 0 to 1, with m rows and n columns
