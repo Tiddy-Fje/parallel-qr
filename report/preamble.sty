@@ -1,0 +1,157 @@
+\ProvidesPackage{preamble}
+
+
+%%%%%%%%%%%%%%%%%%% PACKAGES %%%%%%%%%%%%%%%%%%%%
+
+%----------------- Formatting ------------------%
+
+%\usepackage[margin=2cm, showframe]{geometry} % to check frame
+\usepackage[margin=2cm]{geometry}
+
+%\usepackage{ragged2e} 
+\usepackage{titlesec} 
+%\usepackage{fancyhdr} \fancyhf{} \rhead{} \lhead{} \rfoot{\thepage} \lfoot{}
+%\pagestyle{fancy} 
+
+%--------- Graphics, tables, and stuff ---------%
+
+\usepackage{xcolor} 
+\usepackage{graphicx}%[draft]
+\graphicspath{{./figures/}} 
+\usepackage{wrapfig} 
+\usepackage{overpic}  
+\usepackage{pgfplots}
+\usepackage{booktabs} 
+\usepackage{multicol} 
+\usepackage{multirow} 
+\usepackage[labelfont=bf,textfont=it]{caption} 
+\usepackage[labelfont=bf,textfont=it]{subcaption}
+\usepackage{enumitem}
+\usepackage{lipsum}
+
+%-------------------- Math ---------------------%
+
+\usepackage{amsmath} 
+\usepackage{amssymb} 
+\usepackage{siunitx} 
+
+%------------------- Others --------------------%
+\usepackage{appendix}
+
+\usepackage{hyperref} \hypersetup{colorlinks=true,linkcolor=blue,urlcolor=blue,citecolor=blue}
+\usepackage[utf8]{inputenc} 
+\usepackage[backend=biber, style=nature ]{biblatex} 
+%\addbibresource{rising_new.bib} 
+
+%%%%%%%%%%%%%%%%%%% NEWCOMMANDS %%%%%%%%%%%%%%%%%%%%
+
+%----------------- Math ------------------%
+
+\newcommand{\del}{\ensuremath{\partial{}}}
+\newcommand{\et}{\ensuremath{\wedge{}}} \newcommand{\ou}{\ensuremath{\vee{}}}
+%\newcommand{\ss}[1]{_\text{#1}}
+\newcommand{\lra}{\ensuremath{\Leftrightarrow{}}}
+\newcommand{\ra}{\ensuremath{\Rightarrow{}}} \newcommand{\la}{\ensuremath{\Leftarrow{}}}
+\newcommand{\tx}{\ensuremath{\text}}
+
+%\newcommand{\inv}[1]{\ensuremath{\frac{1}{{#1}}}}
+\newcommand{\grad}[1]{\ensuremath{\nabla{}{#1}}}
+\newcommand{\lapl}[1]{\ensuremath{\nabla{}^2{#1}}}
+\newcommand{\rota}[1]{\ensuremath{\vec\nabla{}\times{}{\vec{#1}}}}
+\newcommand{\dive}[1]{\ensuremath{\nabla{}\cdot{}{#1}}}
+\newcommand{\delder}[2]{\ensuremath{\frac{\partial{#1}}{\partial{#2}}}}
+\newcommand{\dder}[2]{\ensuremath{\frac{d{#1}}{d{#2}}}}
+\newcommand{\eval}[2]{\left.{#1}\right|_{#2}}
+
+\newcommand{\bmu}{\mbox{\boldmath $\mu$}}
+\newcommand{\btau}{\mbox{\boldmath $\tau$}}
+
+%----------------- Other ------------------%
+
+\newcommand{\mail}[1]{{\href{mailto:#1}{#1}}}
+
+%%%%%%%%%%%%%%%%%%% REF ORG %%%%%%%%%%%%%%%%%%%%
+
+\labelformat{figure}{Fig.#1}
+\labelformat{subfigure}{Fig.#1}
+\labelformat{table}{Tab.#1}
+\labelformat{subtable}{Tab.#1}
+\labelformat{section}{Sec.#1}
+\labelformat{subsection}{Sec.#1}
+\labelformat{equation}{Eq.#1}
+%\newcommand{\aref}[1]{\textbf{Apx\ref{#1}}} 
+
+%%%%%%%%%%%%%%%%%%% RENEW COMMANDS %%%%%%%%%%%%%%%%%%%%
+
+%----------------- Math ------------------%
+
+\renewcommand{\vec}[1]{\mathbf{#1}}
+\renewcommand{\phi}{\varphi}
+\renewcommand{\epsilon}{\varepsilon}
+
+%----------------- Caption org ------------------%
+
+\renewcommand{\tablename}{Tab} 
+\renewcommand{\subtablename}{Tab} 
+\renewcommand{\figurename}{Fig} 
+\renewcommand{\subfigurename}{}
+\renewcommand{\thesubtable}{\arabic{table}\alph{subtable}} 
+\renewcommand{\thesubfigure}{\arabic{figure}\alph{subfigure}}
+
+%\usepackage[french]{babel}
+%\usepackage[T1]{fontenc}
+%\addto\captionsfrench{\renewcommand{\figurename}{Fig}}
+
+%----------------- Other ------------------%
+
+\renewcommand{\arraystretch}{1.5}
+%\renewcommand{\headrulewidth}{1pt} 
+%\renewcommand{\footrulewidth}{1pt} 
+
+%%%%%%%%%%%%%%%%%%% WHITE-SPACE AND CAPTION FORMATTING %%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\myparagraph}[1]{\paragraph{#1}\mbox{}\hspace{0.5em}}
+\titleformat{\section}{\normalfont\large\bfseries}{\thesection}{1em}{}
+\titlespacing{\section}{-.0em}{1em}{.5em}
+\titleformat{\subsection}{\normalfont\normalsize\bfseries}{\thesubsection}{0.7em}{}
+\titlespacing{\subsection}{-.0em}{.7em}{.4em}
+\titlespacing{\paragraph}{-.0em}{.5em}{.3em}
+
+\captionsetup[figure]{labelformat = simple, labelsep = colon} 
+\captionsetup[table]{labelformat = simple, labelsep = colon} 
+\captionsetup[subfigure]{labelformat = parens}
+\captionsetup[subtable]{labelformat = parens}
+
+%%%%%%%%%%%%%%%%%%% GENERAL PLOT SET UP %%%%%%%%%%%%%%%%%%%%
+
+\pgfplotsset{
+    compat=newest,
+    scale only axis=true,
+    max space between ticks=50pt,
+    try min ticks=5,
+    every axis plot/.append style={thick},
+    tick style={black, thick},
+    grid style=dashed
+%    axis lines = left,
+}
+
+\newlength\figW
+\newlength\figH
+\setlength{\figW}{6.4cm}
+\setlength{\figH}{5.4cm}    % good value for 2 sub-figure figures
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\setlength\columnsep{15pt}
+\setlength\parindent{1.5em}
+
+\newcommand{\myfigure}[3]
+{
+    \begin{figure}[htb]       % replace <line_nb> the with number of lines for the wrapping
+        \centering                                          % and <side> by r or l for right or left (position on the page)
+            \vspace{0em}
+            \includegraphics[width={#1}]{{#2}}
+            \caption{{#3}}
+            \label{fig:{#2}}
+    \end{figure}
+}
