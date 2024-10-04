@@ -1,0 +1,58 @@
+Traceback (most recent call last):
+  File "/home/fjellman/hpc-course/first-hpc-project/code/computation.py", line 19, in <module>
+Traceback (most recent call last):
+Traceback (most recent call last):
+  File "/home/fjellman/hpc-course/first-hpc-project/code/computation.py", line 19, in <module>
+Traceback (most recent call last):
+  File "/home/fjellman/hpc-course/first-hpc-project/code/computation.py", line 19, in <module>
+  File "/home/fjellman/hpc-course/first-hpc-project/code/computation.py", line 19, in <module>
+    mat = [utils.get_other_mat(M,N).toarray(),'mat']
+  File "/home/fjellman/hpc-course/first-hpc-project/code/utils.py", line 10, in get_other_mat
+    mat = [utils.get_other_mat(M,N).toarray(),'mat']
+    mat = [utils.get_other_mat(M,N).toarray(),'mat']
+  File "/home/fjellman/hpc-course/first-hpc-project/code/utils.py", line 10, in get_other_mat
+    sparse_matrix = mmread('../data/cvxbqp1.mtx')
+  File "/ssoft/spack/syrah/v2/opt/spack/linux-rhel9-skylake_avx512/gcc-11.3.0/python-3.10.4-4cxk6upcdoypsygwvcoa7e5vfj4amry2/lib/python3.10/site-packages/scipy/io/_mmio.py", line 76, in mmread
+    mat = [utils.get_other_mat(M,N).toarray(),'mat']
+  File "/home/fjellman/hpc-course/first-hpc-project/code/utils.py", line 10, in get_other_mat
+  File "/home/fjellman/hpc-course/first-hpc-project/code/utils.py", line 10, in get_other_mat
+    sparse_matrix = mmread('../data/cvxbqp1.mtx')
+    return MMFile().read(source)
+  File "/ssoft/spack/syrah/v2/opt/spack/linux-rhel9-skylake_avx512/gcc-11.3.0/python-3.10.4-4cxk6upcdoypsygwvcoa7e5vfj4amry2/lib/python3.10/site-packages/scipy/io/_mmio.py", line 435, in read
+  File "/ssoft/spack/syrah/v2/opt/spack/linux-rhel9-skylake_avx512/gcc-11.3.0/python-3.10.4-4cxk6upcdoypsygwvcoa7e5vfj4amry2/lib/python3.10/site-packages/scipy/io/_mmio.py", line 76, in mmread
+    sparse_matrix = mmread('../data/cvxbqp1.mtx')
+  File "/ssoft/spack/syrah/v2/opt/spack/linux-rhel9-skylake_avx512/gcc-11.3.0/python-3.10.4-4cxk6upcdoypsygwvcoa7e5vfj4amry2/lib/python3.10/site-packages/scipy/io/_mmio.py", line 76, in mmread
+    sparse_matrix = mmread('../data/cvxbqp1.mtx')
+  File "/ssoft/spack/syrah/v2/opt/spack/linux-rhel9-skylake_avx512/gcc-11.3.0/python-3.10.4-4cxk6upcdoypsygwvcoa7e5vfj4amry2/lib/python3.10/site-packages/scipy/io/_mmio.py", line 76, in mmread
+    self._parse_header(stream)
+  File "/ssoft/spack/syrah/v2/opt/spack/linux-rhel9-skylake_avx512/gcc-11.3.0/python-3.10.4-4cxk6upcdoypsygwvcoa7e5vfj4amry2/lib/python3.10/site-packages/scipy/io/_mmio.py", line 499, in _parse_header
+    return MMFile().read(source)
+  File "/ssoft/spack/syrah/v2/opt/spack/linux-rhel9-skylake_avx512/gcc-11.3.0/python-3.10.4-4cxk6upcdoypsygwvcoa7e5vfj4amry2/lib/python3.10/site-packages/scipy/io/_mmio.py", line 435, in read
+    return MMFile().read(source)
+  File "/ssoft/spack/syrah/v2/opt/spack/linux-rhel9-skylake_avx512/gcc-11.3.0/python-3.10.4-4cxk6upcdoypsygwvcoa7e5vfj4amry2/lib/python3.10/site-packages/scipy/io/_mmio.py", line 435, in read
+    self.__class__.info(stream)
+    self._parse_header(stream)
+  File "/ssoft/spack/syrah/v2/opt/spack/linux-rhel9-skylake_avx512/gcc-11.3.0/python-3.10.4-4cxk6upcdoypsygwvcoa7e5vfj4amry2/lib/python3.10/site-packages/scipy/io/_mmio.py", line 499, in _parse_header
+    self._parse_header(stream)
+  File "/ssoft/spack/syrah/v2/opt/spack/linux-rhel9-skylake_avx512/gcc-11.3.0/python-3.10.4-4cxk6upcdoypsygwvcoa7e5vfj4amry2/lib/python3.10/site-packages/scipy/io/_mmio.py", line 499, in _parse_header
+  File "/ssoft/spack/syrah/v2/opt/spack/linux-rhel9-skylake_avx512/gcc-11.3.0/python-3.10.4-4cxk6upcdoypsygwvcoa7e5vfj4amry2/lib/python3.10/site-packages/scipy/io/_mmio.py", line 233, in info
+    return MMFile().read(source)
+  File "/ssoft/spack/syrah/v2/opt/spack/linux-rhel9-skylake_avx512/gcc-11.3.0/python-3.10.4-4cxk6upcdoypsygwvcoa7e5vfj4amry2/lib/python3.10/site-packages/scipy/io/_mmio.py", line 435, in read
+    self.__class__.info(stream)
+  File "/ssoft/spack/syrah/v2/opt/spack/linux-rhel9-skylake_avx512/gcc-11.3.0/python-3.10.4-4cxk6upcdoypsygwvcoa7e5vfj4amry2/lib/python3.10/site-packages/scipy/io/_mmio.py", line 233, in info
+    mmid, matrix, format, field, symmetry = \
+ValueError: not enough values to unpack (expected 5, got 2)
+    mmid, matrix, format, field, symmetry = \
+    self.__class__.info(stream)
+  File "/ssoft/spack/syrah/v2/opt/spack/linux-rhel9-skylake_avx512/gcc-11.3.0/python-3.10.4-4cxk6upcdoypsygwvcoa7e5vfj4amry2/lib/python3.10/site-packages/scipy/io/_mmio.py", line 233, in info
+    self._parse_header(stream)
+  File "/ssoft/spack/syrah/v2/opt/spack/linux-rhel9-skylake_avx512/gcc-11.3.0/python-3.10.4-4cxk6upcdoypsygwvcoa7e5vfj4amry2/lib/python3.10/site-packages/scipy/io/_mmio.py", line 499, in _parse_header
+ValueError: not enough values to unpack (expected 5, got 2)
+    mmid, matrix, format, field, symmetry = \
+ValueError: not enough values to unpack (expected 5, got 2)
+    self.__class__.info(stream)
+  File "/ssoft/spack/syrah/v2/opt/spack/linux-rhel9-skylake_avx512/gcc-11.3.0/python-3.10.4-4cxk6upcdoypsygwvcoa7e5vfj4amry2/lib/python3.10/site-packages/scipy/io/_mmio.py", line 233, in info
+    mmid, matrix, format, field, symmetry = \
+ValueError: not enough values to unpack (expected 5, got 2)
+srun: error: h133: tasks 0-3: Exited with exit code 1
+srun: Terminating StepId=4084390.0

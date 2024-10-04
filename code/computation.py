@@ -16,7 +16,7 @@ PRINT_RESULTS = True
 # Problem set up 
 M = 2**10
 N = np.sqrt(M).astype(int)
-mat = [utils.get_other_mat(M,N),'mat']
+mat = [utils.get_other_mat(M,N).toarray(),'mat']
 sing_mat = [utils.get_C(M,N),'sing_mat']
 
 
