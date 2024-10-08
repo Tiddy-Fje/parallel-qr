@@ -1,0 +1,12 @@
+#!/bin/bash -l
+
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=32
+#SBATCH --cpus-per-task=1
+#SBATCH --time=20:00
+#SBATCH --account=math-505
+#SBATCH --qos=serial
+#SBATCH --output=../logs/32_procs.log
+
+module load gcc openmpi python py-mpi4py py-h5py
+srun python computation.py
