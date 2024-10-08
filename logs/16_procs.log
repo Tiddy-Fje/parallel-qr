@@ -1,9 +1,9 @@
 Printing Results for  cholesky_mat :
-Maximal run-times :  [0.31412482 0.34351377 0.33678161 0.33290565 0.36218039]
+Maximal run-times :  [0.09815544 0.09863544 0.11707282 0.11391931 0.10139598]
 Final Q Condition Number :  1.0000000000000027
 Final Error on Norm :  4.1533019674114384e-15
 Computing metrics
 Printing Results for  CGS_mat :
-Maximal run-times :  [3.13306092 3.55298122 4.8292569  3.5783814  3.6784723 ]
+Maximal run-times :  [1.23927696 0.40431056 0.37179438 0.37127851 0.37398799]
 Final Q Condition Number :  1.0000000000000038
-Final Error on Norm :  3.3406501817231695e-15
+Final Error on Norm :  3.2772478791532483e-15

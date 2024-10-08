@@ -66,6 +66,20 @@ def plot_norm_error(norm_errors, n_procs):
     ax.legend()
     plt.show()
 
+
+def runtime_vs_nprocs(df_cholesky):
+    '''
+    Plot the average runtime as a function of the number of processes.
+    df_cholesky : pd.DataFrame
+        The dataframe containing the average runtime for the Cholesky decomposition.
+    '''
+    fig, ax = plt.subplots()
+    ax.errorbar(df_cholesky['n_procs'], df_cholesky['avg_runtime'], yerr=df_cholesky['std_runtime'], fmt='o')
+    ax.set_xlabel('Number of processes')
+    ax.set_ylabel('Average runtime')
+    plt.show()
+
+
 def import_data(ns_procs:np.array):
     data_list_cholesky = []
     data_list_gram = []
@@ -89,7 +103,8 @@ def import_data(ns_procs:np.array):
     df_cholesky = pd.DataFrame(data_list_cholesky, index=ns_procs)
     return df_cholesky, data_list_gram
 
-df_cholesky, data_list_gram = import_data(np.array([4,32]))
+df_cholesky, data_list_gram = import_data(np.array([1,2,4,8]))
+runtime_vs_nprocs(df_cholesky)
 
 #print(norm_errors,'\n',norm_errors2)
 #plot_norm_error(((norm_errors,norm_errors2)), [2,4])
