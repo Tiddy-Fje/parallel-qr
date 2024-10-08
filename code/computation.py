@@ -20,23 +20,12 @@ N = 20 # 330
 
 assert M % N_PROCS == 0, 'Number of processors must divide the number of rows of the matrix'
 
-mat = None
-sing_mat = None
-if RANK == 0:
-    mat = sparse.load_npz(f'../data/csr_{M}_by_{N}_other_mat.npz').toarray()
-    sing_mat = utils.get_C(M,N)
-
-mat_l = np.empty((M//N_PROCS, N), dtype=float)
-sing_mat_l = np.empty((M//N_PROCS, N), dtype=float)
-COMM.Scatter(mat, mat_l, root=0)
-COMM.Scatter(sing_mat, sing_mat_l, root=0)
-mat_l = [mat_l, 'mat']
-sing_mat_l = [sing_mat_l, 'sing_mat']
-
+with h5py.File(f'../output/results_n-procs={N_PROCS}.h5', 'w') as f:
+    pass
 
 def std_print_results(max_runtimes, err_on_norm, Q_cond_number, ending):
     # store the results in a h5py file
-    with h5py.File(f'../output/results_n-procs={N_PROCS}.h5', 'w') as f:
+    with h5py.File(f'../output/results_n-procs={N_PROCS}.h5', 'a') as f:
         f.create_dataset(f'max_runtime_avg_{ending}', data=np.mean(max_runtimes))
         f.create_dataset(f'max_runtime_std_{ending}', data=np.std(max_runtimes))
         f.create_dataset(f'n_rep_{ending}', data=N_REPS)
@@ -201,6 +190,22 @@ def TSQR(A):
             f.create_dataset(f'R_{ending}', data=R_l_k)
 
     return 
+
+
+
+mat = None
+sing_mat = None
+if RANK == 0:
+    mat = sparse.load_npz(f'../data/csr_{M}_by_{N}_other_mat.npz').toarray()
+    sing_mat = utils.get_C(M,N)
+
+mat_l = np.empty((M//N_PROCS, N), dtype=float)
+sing_mat_l = np.empty((M//N_PROCS, N), dtype=float)
+COMM.Scatter(mat, mat_l, root=0)
+COMM.Scatter(sing_mat, sing_mat_l, root=0)
+mat_l = [mat_l, 'mat']
+sing_mat_l = [sing_mat_l, 'sing_mat']
+
 
 cholesky(mat_l)
 #cholesky(sing_mat_l)

@@ -74,12 +74,12 @@ def import_data(ns_procs:np.array):
         cholesky_data = {}
         gram_data = {}
         with h5py.File(f'{input_path}results_n-procs={n_procs}.h5', 'r') as f:
-#            print(f.keys())
-            #cholesky_data['avg_runtime'] = f['avg_runtime_cholesky'][()]
-            #cholesky_data['std_runtime'] = f['std_runtime_cholesky'][()]
-            #cholesky_data['n_rep'] = f['n_rep_cholesky'][()]
-            #cholesky_data['err_on_norm'] = f['err_on_norm_cholesky'][()]
-            #cholesky_data['Q_cond_number'] = f['Q_cond_number_cholesky'][()]
+            print(f.keys())
+            cholesky_data['avg_runtime'] = f['max_runtime_avg_cholesky_mat'][()]
+            cholesky_data['std_runtime'] = f['max_runtime_std_cholesky_mat'][()]
+            cholesky_data['n_rep'] = f['n_rep_cholesky_mat'][()]
+            cholesky_data['err_on_norm'] = f['err_on_norm_cholesky_mat'][()]
+            cholesky_data['Q_cond_number'] = f['Q_cond_number_cholesky_mat'][()]
             cholesky_data['n_procs'] = n_procs
             gram_data['Q'] = f['Q_gram_schmidt'][:]
         data_list_cholesky.append(cholesky_data)
@@ -89,12 +89,7 @@ def import_data(ns_procs:np.array):
     df_cholesky = pd.DataFrame(data_list_cholesky, index=ns_procs)
     return df_cholesky, data_list_gram
 
-df_cholesky, data_list_gram = import_data(np.array([2, 4]))
-print(data_list_gram[0]['Q'].shape)
-QtQ, cond_numbers = compute_QtQ(data_list_gram[0]['Q'])
-norm_errors = norm_error_from_QtQ(QtQ)
-QtQ, cond_numbers = compute_QtQ(data_list_gram[1]['Q'])
-norm_errors2 = norm_error_from_QtQ(QtQ)
+df_cholesky, data_list_gram = import_data(np.array([4,32]))
 
-print(norm_errors,'\n',norm_errors2)
+#print(norm_errors,'\n',norm_errors2)
 #plot_norm_error(((norm_errors,norm_errors2)), [2,4])
