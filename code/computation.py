@@ -4,6 +4,7 @@ import utils
 import time 
 import h5py
 from scipy.linalg import solve_triangular
+from scipy import sparse
 
 # Initialize MPI
 COMM = MPI.COMM_WORLD
@@ -14,10 +15,23 @@ N_REPS = 5
 PRINT_RESULTS = True
 
 # Problem set up 
-M = 2**10
-N = np.sqrt(M).astype(int)
-mat = [utils.get_other_mat(M,N).toarray(),'mat']
-sing_mat = [utils.get_C(M,N),'sing_mat']
+M = 32768
+N = 330
+
+assert M % N_PROCS == 0, 'Number of processors must divide the number of rows of the matrix'
+
+mat = None
+sing_mat = None
+if RANK == 0:
+    mat = sparse.load_npz(f'../data/csr_{M}_by_{N}_other_mat.npz').toarray()
+    sing_mat = utils.get_C(M,N)
+
+mat_l = np.empty((M//N_PROCS, N), dtype=float)
+sing_mat_l = np.empty((M//N_PROCS, N), dtype=float)
+COMM.Scatter(mat, mat_l, root=0)
+COMM.Scatter(sing_mat, sing_mat_l, root=0)
+mat_l = [mat_l, 'mat']
+sing_mat_l = [sing_mat_l, 'sing_mat']
 
 
 def std_print_results(max_runtimes, err_on_norm, Q_cond_number, ending):
@@ -26,7 +40,7 @@ def std_print_results(max_runtimes, err_on_norm, Q_cond_number, ending):
         f.create_dataset(f'max_runtime_avg_{ending}', data=np.mean(max_runtimes))
         f.create_dataset(f'max_runtime_std_{ending}', data=np.std(max_runtimes))
         f.create_dataset(f'n_rep_{ending}', data=N_REPS)
-        if ending == 'CGS': # store the vectors instead of the scalars
+        if ending[:3] == 'CGS': # store the vectors instead of the scalars
             f.create_dataset(f'errs_on_norm_{ending}', data=err_on_norm)
             f.create_dataset(f'Q_cond_numbers_{ending}', data=Q_cond_number)
             err_on_norm = err_on_norm[-1]
@@ -41,13 +55,10 @@ def std_print_results(max_runtimes, err_on_norm, Q_cond_number, ending):
         print( 'Final Q Condition Number : ', Q_cond_number )
         print( 'Final Error on Norm : ', err_on_norm )
 
-def cholesky(A):
-    A, mat_lab = A
-    G = np.empty((N, N))
-    I = np.eye(N)
 
-    A_list = np.array_split(A, N_PROCS, axis=0)
-    A_l = A_list[RANK]
+def cholesky(A_l):
+    A_l, mat_lab = A_l
+    G = np.empty((N, N))
     runtimes = np.empty(N_REPS)
     
     for i in range(N_REPS):
@@ -74,6 +85,7 @@ def cholesky(A):
     COMM.Gather(runtimes, tot_runtimes, root=0)
 
     if RANK == 0:
+        I = np.eye(N)
         max_runtimes = np.max(tot_runtimes, axis=0) # max over all processors
         err_on_norm = np.linalg.norm( I - Q.T@Q )
         Q_cond_number = np.linalg.cond(Q)
@@ -87,15 +99,16 @@ def CGS_metrics(Q):
         The matrix Q from the QR decomposition.
     '''
     #m = Q.shape[0]
+    print('Computing metrics')
     n = Q.shape[1]
-    mats_squared = [np.linalg.dot(Q[:,0], Q[:,0])]
+    mats_squared = [np.dot(Q[:,0], Q[:,0])]
     cond_numbers = [1.0] # assuming that the condition number of a column matrix is 1
     norm_errors = np.empty(n)
     norm_errors[0] = np.abs( mats_squared[0] - 1.0 )
     for j in range(1, n):
         Q_j = Q[:,:j]
         Q_j_squared = Q_j.T @ Q_j
-        norm_errors[j] = np.linalg.norm( Q_j_squared[j] - np.eye(j+1) )
+        norm_errors[j] = np.linalg.norm( Q_j_squared - np.eye(j) )
         cond_numbers.append(np.linalg.cond(Q_j))
         mats_squared.append(Q_j_squared)
     return norm_errors, cond_numbers
@@ -104,10 +117,8 @@ def CGS_metrics(Q):
 # we care about max over the processors 
 # does that mean we should store times for every processor
 # and then take the max over processors of every repetition, right ?
-def gram_schmidt(A):
-    A, mat_lab = A
-    A_list = np.array_split(A, N_PROCS, axis=0)
-    A_l = A_list[RANK]
+def gram_schmidt(A_l):
+    A_l, mat_lab = A_l
     Q_l = np.empty((A_l.shape[0], N), dtype=float)
     Q = np.empty((M, N), dtype=float) 
 
@@ -191,6 +202,6 @@ def TSQR(A):
 
     return 
 
-cholesky(mat)
-cholesky(sing_mat)
-#gram_schmidt()
+cholesky(mat_l)
+#cholesky(sing_mat_l)
+gram_schmidt(mat_l)
