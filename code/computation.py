@@ -20,8 +20,9 @@ N = 20 # 330
 
 assert M % N_PROCS == 0, 'Number of processors must divide the number of rows of the matrix'
 
-with h5py.File(f'../output/results_n-procs={N_PROCS}.h5', 'w') as f:
-    pass
+if RANK == 0:
+    with h5py.File(f'../output/results_n-procs={N_PROCS}.h5', 'w') as f:
+        pass
 
 def std_print_results(max_runtimes, err_on_norm, Q_cond_number, ending):
     # store the results in a h5py file
@@ -87,7 +88,6 @@ def CGS_metrics(Q):
     Q : np.array
         The matrix Q from the QR decomposition.
     '''
-    #m = Q.shape[0]
     print('Computing metrics')
     n = Q.shape[1]
     mats_squared = [np.dot(Q[:,0], Q[:,0])]
@@ -162,6 +162,7 @@ def TSQR(A):
     runtimes = np.empty(N_REPS)
     
     Y_l_kp1, R_l_kp1 = np.linalg.qr(A_l) # check if correct mode of QR
+    Ys = [Y_l_kp1]
     logp = np.log2(N_PROCS)
     assert logp.is_integer()
 
@@ -179,9 +180,16 @@ def TSQR(A):
             COMM.Recv(R_j_kp1, source=j)
             Y_l_k, R_l_k = np.linalg.qr(np.concatenate((R_l_kp1,R_j_kp1), axis=0)) # check if lower or upper triangular 
             R_l_kp1 = R_l_k
-            Y_l_kp1 = Y_l_k
+            Ys.append(Y_l_k)
         pass
     if RANK == 0:
+        I = np.eye(N)
+        Q = np.zeros((M,N), dtype=float)
+        Q[:N,:] = I
+
+        for i in range(len(Ys)-1, -1, -1):
+            Q = Ys[i] @ Q
+        
         #R = R_l_k
         ending = 'TSQR'
         #Q_cond_number = np.linalg.cond(Q)
