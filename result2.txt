@@ -1,6 +1,0 @@
-/ssoft/spack/syrah/v2/opt/spack/linux-rhel9-skylake_avx512/gcc-11.3.0/python-3.10.4-4cxk6upcdoypsygwvcoa7e5vfj4amry2/bin/python: can't open file '/home/fjellman/hpc-course/first-hpc-project/computation.py': [Errno 2] No such file or directory
-/ssoft/spack/syrah/v2/opt/spack/linux-rhel9-skylake_avx512/gcc-11.3.0/python-3.10.4-4cxk6upcdoypsygwvcoa7e5vfj4amry2/bin/python: can't open file '/home/fjellman/hpc-course/first-hpc-project/computation.py': [Errno 2] No such file or directory
-/ssoft/spack/syrah/v2/opt/spack/linux-rhel9-skylake_avx512/gcc-11.3.0/python-3.10.4-4cxk6upcdoypsygwvcoa7e5vfj4amry2/bin/python: can't open file '/home/fjellman/hpc-course/first-hpc-project/computation.py': [Errno 2] No such file or directory
-/ssoft/spack/syrah/v2/opt/spack/linux-rhel9-skylake_avx512/gcc-11.3.0/python-3.10.4-4cxk6upcdoypsygwvcoa7e5vfj4amry2/bin/python: can't open file '/home/fjellman/hpc-course/first-hpc-project/computation.py': [Errno 2] No such file or directory
-srun: error: h133: tasks 0-3: Exited with exit code 2
-srun: Terminating StepId=4084383.0

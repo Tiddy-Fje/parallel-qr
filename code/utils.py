@@ -25,4 +25,4 @@ def get_C( m:int, n:int ):
 
 if __name__ == '__main__':
 	get_other_mat(32768,330)
-	get_other_mat(1024,30)
+	get_other_mat(2048,20)

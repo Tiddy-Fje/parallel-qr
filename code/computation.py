@@ -15,8 +15,8 @@ N_REPS = 5
 PRINT_RESULTS = True
 
 # Problem set up 
-M = 32768
-N = 330
+M = 2048 # 32768
+N = 20 # 330
 
 assert M % N_PROCS == 0, 'Number of processors must divide the number of rows of the matrix'
 
