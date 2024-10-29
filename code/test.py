@@ -1,5 +1,31 @@
+from mpi4py import MPI
 import numpy as np
-import matplotlib.pyplot as plt
+
+a = np.array([1])
+b = np.array([4])
+print(a@b)
+'''
+
+def get_partner_idx( rank:int, log_sample:int ) -> int:
+    idx = 0
+    if rank % 2**(log_sample+1) == 0:
+        idx = rank + 2**log_sample
+    else:
+        idx = rank - 2**log_sample
+    return idx
+
+arange = np.arange(0, 16)
+log_sample = [0,1,2,3]
+partner_idx = []
+for i in log_sample:
+    for rank in arange:
+        #print(rank % 2**i)
+        if not (rank % 2**i == 0):
+            continue
+        partner_idx.append(get_partner_idx(rank, i))
+    print(f'partner_idx={np.array(partner_idx)}')
+    partner_idx = []
+
 
 # Your 2x3 matrix of data
 data = np.array([[4, 7, 1], [5, 2, 8]])
@@ -30,3 +56,5 @@ ax.legend()
 
 # Show the plot
 plt.show()
+
+'''
