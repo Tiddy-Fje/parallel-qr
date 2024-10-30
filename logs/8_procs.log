@@ -1,9 +1,25 @@
-Printing Results for  cholesky_mat :
-Maximal run-times :  [0.11194039 0.09311026 0.09224604 0.09083188 0.09618257]
-Final Q Condition Number :  1.0000000000000027
-Final Error on Norm :  4.1533019674114384e-15
-Computing metrics
-Printing Results for  CGS_mat :
-Maximal run-times :  [1.07647955 0.45407058 0.42315232 0.42123935 0.42712117]
-Final Q Condition Number :  1.0000000000000038
-Final Error on Norm :  3.2772478791532483e-15
+Printing Results for CQR_mat :
+Maximal run-times : [0.13788687 0.11579632 0.11694462 0.11972884 0.11630977 0.11639411
+ 0.11642364 0.11666816 0.11583658 0.116193  ]
+Final Q Condition Number : 1.0000000000000027
+Final Error on Norm : 4.1533019674114384e-15
+Printing Results for CGS_mat :
+Maximal run-times : [1.45469846 0.70450794 0.72896644 0.71867053 0.73840923 0.79593446
+ 0.63835842 0.66554338 0.81721301 0.82078425]
+Final Q Condition Number : 1.0000000000000036
+Final Error on Norm : 3.2869227556075354e-15
+Printing Results for CGS_sing_mat :
+Maximal run-times : [1.6415153  0.75404284 0.76509398 0.83154453 0.81249708 0.85143158
+ 0.79797018 0.75327116 0.75335317 0.75602067]
+Final Q Condition Number : 1.1196356318175998e+16
+Final Error on Norm : 182.32099588588403
+Printing Results for TSQR_mat :
+Maximal run-times : [1.48135501 1.48024131 1.45088011 1.42890609 1.42597096 1.42564759
+ 1.43253375 1.42545417 1.43330013 1.43440458]
+Final Q Condition Number : 1.0000000000000036
+Final Error on Norm : 6.575558585804999e-15
+Printing Results for TSQR_sing_mat :
+Maximal run-times : [2.26291403 1.51665708 1.5034863  1.50957823 1.52042026 1.49012764
+ 1.48659077 1.46862676 1.45919761 1.4559709 ]
+Final Q Condition Number : 1.0000000000000033
+Final Error on Norm : 9.688604563436606e-15
