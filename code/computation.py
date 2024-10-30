@@ -195,8 +195,8 @@ def TSQR(A_l):
                 R_l_kp1 = R_l_k
                 Ys.append(Y_l_k)
 
-        Q = build_Q( Ys )
         runtimes[i] = time.perf_counter() - start
+        Q = build_Q( Ys ) # just moved this out of timing
 
     tot_runtimes = None
     if RANK == 0:

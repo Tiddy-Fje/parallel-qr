@@ -88,7 +88,7 @@ def CGS_plot(data):
     data : dict
         imported data
     '''
-    fig, ax = plt.subplots(2, 1, figsize=(10, 10), sharex=True)
+    fig, ax = plt.subplots(2, 1, figsize=(10, 10))
     labels = [r'Non-singular $A$', r'Singular $A$']
     for i, mat_lab in enumerate(['mat', 'sing_mat']):
         norm_errors = data[f'CGS_errs_{mat_lab}']
@@ -100,10 +100,11 @@ def CGS_plot(data):
     #ax[0].set_xlabel('Number of included vectors in the basis')
     ax[0].set_ylabel(r'$\|I-Q^TQ|\|$')
     ax[0].set_yscale('log')
+    #ax[0].set_xscale('log')
     ax[0].legend()
     ax[1].set_xlabel(r'Number of vectors included in $Q$')
     ax[1].set_ylabel(r'$\kappa(Q)$')
-    #ax[1].set_yscale('log')
+    ax[1].set_yscale('log')
     ax[1].legend()
 
     plt.savefig(f'{FIG_PATH}CGS_metric_evolution.png')
@@ -121,12 +122,18 @@ def runtime_vs_nprocs(data, mat_lab='mat'):
     '''
     fig, ax = plt.subplots()
     algos = ['CQR', 'CGS', 'TSQR']
+    baseline = 0.0
     for algo in algos:
         time_df = data[f't_df_{algo}']
         std_on_mean = time_df[f'{algo}_std_t_{mat_lab}'] / np.sqrt(time_df[f'{algo}_n_rep_{mat_lab}'])
-        ax.errorbar(time_df['n_procs'], time_df[f'{algo}_avg_t_{mat_lab}'], yerr=std_on_mean, fmt='o', capsize=5, label=algo)
+        if algo == 'CQR':
+            baseline = time_df[f'{algo}_avg_t_{mat_lab}'][1]
+            baseline = 1.0
+        ax.errorbar(time_df['n_procs'], time_df[f'{algo}_avg_t_{mat_lab}']/baseline, yerr=std_on_mean/baseline, fmt='o', capsize=5, label=algo)
     ax.set_xlabel('Number of processors')
-    ax.set_ylabel('Average runtime')
+    ax.set_ylabel('Performance [s]')
+    ax.set_yscale('log')
+    ax.set_xscale('log')
     ax.legend()
     plt.savefig(f'{FIG_PATH}runtime_vs_nprocs_{mat_lab}.png')
 
