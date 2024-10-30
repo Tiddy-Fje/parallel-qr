@@ -1,21 +1,18 @@
 from matplotlib import pyplot as plt
 import numpy as np
 import h5py
+import utils
 import pandas as pd
 
 IN_PATH = '../output/'
 FIG_PATH = '../figures/'
 SHOW_PLOTS = False
 
-# fix rcParams for plotting
-plt.rcParams.update({'font.size': 14})
-plt.rcParams.update({'lines.linewidth': 2, 'lines.markersize': 10})
-
-
 def load_mat_metrics(file, mat_lab, data):
     with h5py.File(file, 'r') as f:
-        data[f'CQR_err_{mat_lab}'] = f[f'err_on_norm_CQR_{mat_lab}'][()]
-        data[f'CQR_cond_{mat_lab}'] = f[f'Q_cond_number_CQR_{mat_lab}'][()]
+        if not mat_lab == 'sing_mat':
+            data[f'CQR_err_{mat_lab}'] = f[f'err_on_norm_CQR_{mat_lab}'][()]
+            data[f'CQR_cond_{mat_lab}'] = f[f'Q_cond_number_CQR_{mat_lab}'][()]
         data[f'CGS_errs_{mat_lab}'] = f[f'errs_on_norm_CGS_{mat_lab}'][:]
         data[f'CGS_conds_{mat_lab}'] = f[f'Q_cond_numbers_CGS_{mat_lab}'][:]
         data[f'TSQR_err_{mat_lab}'] = f[f'err_on_norm_TSQR_{mat_lab}'][()]
@@ -23,9 +20,10 @@ def load_mat_metrics(file, mat_lab, data):
 
 def load_mat_runtimes(file, mat_lab, CQR_data, CGS_data, TSQR_data):
     with h5py.File(file, 'r') as f:
-        CQR_data[f'CQR_avg_t_{mat_lab}'] = f[f'max_t_avg_CQR_{mat_lab}'][()]
-        CQR_data[f'CQR_std_t_{mat_lab}'] = f[f'max_t_std_CQR_{mat_lab}'][()]
-        CQR_data[f'CQR_n_rep_{mat_lab}'] = f[f'n_rep_CQR_{mat_lab}'][()]
+        if not mat_lab == 'sing_mat':
+            CQR_data[f'CQR_avg_t_{mat_lab}'] = f[f'max_t_avg_CQR_{mat_lab}'][()]
+            CQR_data[f'CQR_std_t_{mat_lab}'] = f[f'max_t_std_CQR_{mat_lab}'][()]    
+            CQR_data[f'CQR_n_rep_{mat_lab}'] = f[f'n_rep_CQR_{mat_lab}'][()]
         CGS_data[f'CGS_avg_t_{mat_lab}'] = f[f'max_t_avg_CGS_{mat_lab}'][()]
         CGS_data[f'CGS_std_t_{mat_lab}'] = f[f'max_t_std_CGS_{mat_lab}'][()]
         CGS_data[f'CGS_n_rep_{mat_lab}'] = f[f'n_rep_CGS_{mat_lab}'][()]
@@ -46,7 +44,7 @@ def import_data( ns_procs:np.array ):
 
         file = f'{IN_PATH}results_n-procs={n_procs}.h5'
         with h5py.File(file, 'r') as f:
-            #print(f.keys())
+            #print(file,f.keys())
             CQR_data['n_procs'] = n_procs
             CGS_data['n_procs'] = n_procs
             TSQR_data['n_procs'] = n_procs
@@ -68,53 +66,6 @@ def import_data( ns_procs:np.array ):
     
     return data
 
-
-def compute_QtQ(Q):
-    '''
-    Compute the error on the norm of the Q[:,:j].T @ Q[:,:j] matrices to produce a sequence. The computation for Q[:,:j+1].T @ Q[:,:j+1] is done by using the previous result Q[:,:j].T @ Q[:,:j] and the new column of Q.
-    Q : np.array
-        The matrix Q from the QR decomposition.
-    '''
-    m = Q.shape[0]
-    n = Q.shape[1]
-    mats_squared = [np.linalg.norm(Q[:,0])]
-    mat = Q[:,0:2]
-    cond_numbers = [np.linalg.cond(mat)]
-    mat_squared = mat.T @ mat
-    mats_squared.append(mat_squared)
-    for j in range(2, n):
-        new_Q = Q[:,j]
-        Q_j_squared = np.empty((j+1, j+1))
-
-        Q_j_11 = mat_squared 
-        Q_j_12 = mat.T @ new_Q
-        Q_j_21 = new_Q.T @ mat 
-        Q_j_22 = np.dot(new_Q, new_Q)
-
-        Q_j_squared[:-1,:-1] = Q_j_11
-        Q_j_squared[:-1,-1] = Q_j_12
-        Q_j_squared[-1,:-1] = Q_j_21
-        Q_j_squared[-1,-1] = Q_j_22
-
-        mat = Q[:,:j+1]
-        mat_squared = Q_j_squared
-        cond_numbers.append(np.linalg.cond(mat))
-        mats_squared.append(Q_j_squared)
-        
-    return mats_squared, cond_numbers
-
-def norm_error_from_QtQ(QtQ):
-    '''
-    Compute the error on the norm of the Q[:,:j].T @ Q[:,:j] matrices to produce a sequence.
-    QtQ : list
-        List of matrices Q[:,:j].T @ Q[:,:j] for j=1,...,n.
-    '''
-    n = QtQ[-1].shape[0]
-    assert len(QtQ) == n
-    norm_errors = np.empty(n)
-    for j in range(n):
-        norm_errors[j] = np.linalg.norm( QtQ[j] - np.eye(j+1) )
-    return norm_errors
 
 def plot_norm_error(norm_errors, n_procs):
     '''
@@ -172,7 +123,8 @@ def runtime_vs_nprocs(data, mat_lab='mat'):
     algos = ['CQR', 'CGS', 'TSQR']
     for algo in algos:
         time_df = data[f't_df_{algo}']
-        ax.errorbar(time_df['n_procs'], time_df[f'{algo}_avg_t_{mat_lab}'], yerr=time_df[f'{algo}_std_t_{mat_lab}'], fmt='o', label=algo)
+        std_on_mean = time_df[f'{algo}_std_t_{mat_lab}'] / np.sqrt(time_df[f'{algo}_n_rep_{mat_lab}'])
+        ax.errorbar(time_df['n_procs'], time_df[f'{algo}_avg_t_{mat_lab}'], yerr=std_on_mean, fmt='o', capsize=5, label=algo)
     ax.set_xlabel('Number of processors')
     ax.set_ylabel('Average runtime')
     ax.legend()
@@ -182,10 +134,11 @@ def runtime_vs_nprocs(data, mat_lab='mat'):
         plt.show()
 
 
-data = import_data(np.array([1,2,4]))
-#data = import_data(np.array([1,2,4,8,16,32,64]))
+
+print('Running core plots')
+#data = import_data(np.array([1,2,4]))
+data = import_data(np.array([1,2,4,8,16,32,64]))
 CGS_plot(data)
 runtime_vs_nprocs(data)
-
-#print(norm_errors,'\n',norm_errors2)
-#plot_norm_error(((norm_errors,norm_errors2)), [2,4])
+print('Running stability plot')
+import cholesky_stability
