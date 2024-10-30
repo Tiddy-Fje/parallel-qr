@@ -20,6 +20,7 @@ def load_mat_metrics(file, mat_lab, data):
 
 def load_mat_runtimes(file, mat_lab, CQR_data, CGS_data, TSQR_data):
     with h5py.File(file, 'r') as f:
+        print(file, f.keys())
         if not mat_lab == 'sing_mat':
             CQR_data[f'CQR_avg_t_{mat_lab}'] = f[f'max_t_avg_CQR_{mat_lab}'][()]
             CQR_data[f'CQR_std_t_{mat_lab}'] = f[f'max_t_std_CQR_{mat_lab}'][()]    
@@ -140,7 +141,22 @@ def runtime_vs_nprocs(data, mat_lab='mat'):
     if SHOW_PLOTS:
         plt.show()
 
-
+def print_metrics(data): 
+    '''
+    Print the metrics of the matrices.
+    data : dict
+        imported data
+    '''
+    for mat_lab in ['mat', 'sing_mat']:
+        print(f'Metrics for {mat_lab}')
+        if not mat_lab == 'sing_mat':
+            print(f'CQR error on norm: {data[f"CQR_err_{mat_lab}"]}')
+            print(f'CQR condition number: {data[f"CQR_cond_{mat_lab}"]}')
+        print(f'CGS errors on norm: {data[f"CGS_errs_{mat_lab}"]}')
+        print(f'CGS condition numbers: {data[f"CGS_conds_{mat_lab}"]}')
+        print(f'TSQR error on norm: {data[f"TSQR_err_{mat_lab}"]}')
+        print(f'TSQR condition number: {data[f"TSQR_cond_{mat_lab}"]}')
+        print('\n')
 
 print('Running core plots')
 #data = import_data(np.array([1,2,4]))
@@ -149,3 +165,5 @@ CGS_plot(data)
 runtime_vs_nprocs(data)
 print('Running stability plot')
 import cholesky_stability
+print('Mat metrics ...')
+print_metrics(data)

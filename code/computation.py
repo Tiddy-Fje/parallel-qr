@@ -3,7 +3,7 @@ import numpy as np
 from utils import *
 import time 
 import h5py
-from scipy.linalg import solve_triangular, block_diag, qr
+from scipy.linalg import solve_triangular, block_diag
 from scipy import sparse
 
 # Initialize MPI
@@ -12,9 +12,8 @@ RANK = COMM.Get_rank()
 N_PROCS = COMM.Get_size()
 LOGP_TOT = int_check(np.log2(N_PROCS))
 
-N_REPS = 10 # 5,10 -> To average the runtimes
-PRINT_RESULTS = True
-MODE = 'reduced' # 'reduced' or 'complete'
+N_REPS = 5 # 5,10 -> To average the runtimes
+SAVE_RESULTS = True 
 
 # Problem set up 
 M = 32768 # 32768 2048
@@ -33,11 +32,10 @@ def std_print_results(max_runtimes, err_on_norm, Q_cond_number, ending):
         f.create_dataset(f'err_on_norm_{ending}', data=err_on_norm)
         f.create_dataset(f'Q_cond_number_{ending}', data=Q_cond_number)
 
-    if PRINT_RESULTS == True:
-        print( 'Printing Results for', ending, ':' )
-        print( 'Maximal run-times :', max_runtimes.flatten() )
-        print( 'Final Q Condition Number :', Q_cond_number )
-        print( 'Final Error on Norm :', err_on_norm )
+    print( 'Printing Results for', ending, ':' )
+    print( 'Maximal run-times :', max_runtimes.flatten() )
+    print( 'Final Q Condition Number :', Q_cond_number )
+    print( 'Final Error on Norm :', err_on_norm )
 
 def metrics_from_Q(Q):
     '''
@@ -82,7 +80,8 @@ def CQR(A_l, stability=False):
         if stability:
             return err_on_norm, Q_cond_number
         ending = f'CQR_{mat_lab}'
-        std_print_results(max_runtimes, err_on_norm, Q_cond_number, ending)
+        if SAVE_RESULTS:
+            std_print_results(max_runtimes, err_on_norm, Q_cond_number, ending)
     return
 
 def CGS_metrics(Q):
@@ -97,7 +96,7 @@ def CGS_metrics(Q):
     
     norm_errors = np.empty(N, dtype=float)
     cond_numbers = np.empty(N, dtype=float)
-    if PRINT_RESULTS :
+    if SAVE_RESULTS :
         print('Computing CGS metrics')
     for j in range(N):
         norm_error, cond_number =  metrics_from_Q(Q[:,:j+1])
@@ -157,7 +156,9 @@ def CGS(A_l):
         errs_on_norm, Q_cond_numbers = CGS_metrics(Q)
         max_runtimes = np.max(tot_runtimes, axis=0) # max over all processors
         ending = f'CGS_{mat_lab}'
-        std_print_results(max_runtimes, errs_on_norm, Q_cond_numbers, ending)
+        if SAVE_RESULTS:
+            std_print_results(max_runtimes, errs_on_norm, Q_cond_numbers, ending)
+    return
 
 def get_partner_idx( rank:int, k:int ) -> int:
     idx = 0
@@ -175,11 +176,11 @@ def TSQR(A_l):
         start = time.perf_counter()
 
         if N_PROCS == 1: # direct QR
-            Q, R = np.linalg.qr(A_l, mode=MODE)
+            Q, R = np.linalg.qr(A_l, mode='reduced')
             runtimes[i] = time.perf_counter() - start
             continue
         
-        Y_l_kp1, R_l_kp1 = np.linalg.qr(A_l, mode=MODE) 
+        Y_l_kp1, R_l_kp1 = np.linalg.qr(A_l, mode='reduced') 
         Ys = [Y_l_kp1]
         for q in range(LOGP_TOT): 
             # only keep needed processors 
@@ -191,7 +192,7 @@ def TSQR(A_l):
             else:
                 R_j_kp1 = np.empty(R_l_kp1.shape, dtype=float)
                 COMM.Recv(R_j_kp1, source=j)
-                Y_l_k, R_l_k = np.linalg.qr(np.concatenate((R_l_kp1[:N,:N],R_j_kp1[:N,:N]), axis=0), mode=MODE)
+                Y_l_k, R_l_k = np.linalg.qr(np.concatenate((R_l_kp1,R_j_kp1), axis=0), mode='reduced')
                 R_l_kp1 = R_l_k
                 Ys.append(Y_l_k)
 
@@ -207,7 +208,8 @@ def TSQR(A_l):
         max_runtimes = np.max(tot_runtimes, axis=0) # max over all processors
         err_on_norm, Q_cond_number = metrics_from_Q(Q)
         ending = f'TSQR_{mat_lab}'
-        std_print_results(max_runtimes, err_on_norm, Q_cond_number, ending)
+        if SAVE_RESULTS:
+            std_print_results(max_runtimes, err_on_norm, Q_cond_number, ending)
     return 
 
 def get_right_mat_shape( p:int ):
@@ -251,7 +253,7 @@ def build_Q( Y_s ):
 
 if __name__ == '__main__':
     assert M % N_PROCS == 0, 'Number of processors must divide the number of rows of the matrix'
-    if RANK == 0: # create the output file
+    if SAVE_RESULTS and RANK == 0: # create the output file
         with h5py.File(f'../output/results_n-procs={N_PROCS}.h5', 'w') as f:
             pass
 
@@ -271,7 +273,6 @@ if __name__ == '__main__':
     sing_mat_l = [sing_mat_l, 'sing_mat']
 
     CQR(mat_l)
-    #CQR(sing_mat_l) # not running this as gets error
     CGS(mat_l)
     CGS(sing_mat_l)
     TSQR(mat_l)
