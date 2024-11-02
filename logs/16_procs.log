@@ -1,20 +1,20 @@
 Printing Results for CQR_mat :
-Maximal run-times : [0.09487082 0.10155186 0.10544162 0.1070798  0.10426587]
+Maximal run-times : [0.07435357 0.07878453 0.07855137 0.08033309 0.07728236]
 Final Q Condition Number : 1.0000000000000027
 Final Error on Norm : 4.1533019674114384e-15
 Printing Results for CGS_mat :
-Maximal run-times : [1.51674567 0.37308416 0.38545856 0.40150571 0.32869938]
+Maximal run-times : [0.93538596 0.25267627 0.24869552 0.2368752  0.23419486]
 Final Q Condition Number : 1.0000000000000036
 Final Error on Norm : 3.2869227556075354e-15
 Printing Results for CGS_sing_mat :
-Maximal run-times : [1.10145276 0.28588815 0.27948203 0.27958061 0.28237225]
+Maximal run-times : [1.01886193 0.26895924 0.26554877 0.24412649 0.26130654]
 Final Q Condition Number : 7406936948378390.0
 Final Error on Norm : 199.28301787413113
 Printing Results for TSQR_mat :
-Maximal run-times : [1.02865826 2.43035718 2.43646361 2.45215134 2.41198468]
+Maximal run-times : [0.87110828 2.35334209 2.3459998  2.35955121 2.34530497]
 Final Q Condition Number : 1.0000000000000033
 Final Error on Norm : 6.564406524990954e-15
 Printing Results for TSQR_sing_mat :
-Maximal run-times : [2.9625622  1.80853398 1.82825634 1.84669619 1.8434058 ]
+Maximal run-times : [3.07494146 2.36424779 2.36661438 2.37013742 2.35996594]
 Final Q Condition Number : 1.0000000000000042
 Final Error on Norm : 1.1947908790332628e-14

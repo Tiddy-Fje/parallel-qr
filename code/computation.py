@@ -14,8 +14,8 @@ RANK = COMM.Get_rank()
 N_PROCS = COMM.Get_size()
 LOGP_TOT = int_check(np.log2(N_PROCS))
 
-N_REPS = 1 # 5,10 -> To average the runtimes
-SAVE_RESULTS = False 
+N_REPS = 5 # 5,10 -> To average the runtimes
+SAVE_RESULTS = True
 PROCS_FOR_STABILITY = 1
 
 # Problem set up 
@@ -279,14 +279,14 @@ if __name__ == '__main__':
 
 
     # Run your function with cProfile
-    cProfile.run('TSQR(mat_l)', 'output.prof')
+    #cProfile.run('TSQR(mat_l)', 'output.prof')
+    #if RANK ==0:
+# Load and sort the stats by cumulative time
+    	#p = pstats.Stats('output.prof')
+    	#p.strip_dirs().sort_stats('cumulative').print_stats(10)  # Prints the top 10 slowest parts
 
-    # Load and sort the stats by cumulative time
-    p = pstats.Stats('output.prof')
-    p.strip_dirs().sort_stats('cumulative').print_stats(10)  # Prints the top 10 slowest parts
-
-    #CQR(mat_l)
-    #CGS(mat_l)
-    #CGS(sing_mat_l)
-    #TSQR(mat_l)
-    #TSQR(sing_mat_l)
+    CQR(mat_l)
+    CGS(mat_l)
+    CGS(sing_mat_l)
+    TSQR(mat_l)
+    TSQR(sing_mat_l)
