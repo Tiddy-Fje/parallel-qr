@@ -37,3 +37,4 @@ if __name__ == '__main__':
 	get_other_mat(32768,330)
 	get_other_mat(2048,20)
 	get_other_mat(50000,600)
+	get_other_mat(16384,128)

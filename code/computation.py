@@ -18,7 +18,6 @@ N_REPS = 5 # 5,10 -> To average the runtimes
 SAVE_RESULTS = True
 PROCS_FOR_STABILITY = 1
 
-# Problem set up 
 M = 32768 # 32768 2048
 N = 330 # 330 20
 
@@ -175,6 +174,10 @@ def get_partner_idx( rank:int, k:int ) -> int:
 def TSQR(A_l):
     A_l, mat_lab = A_l
     runtimes = np.empty(N_REPS)
+    Q = None
+    if RANK == 0:
+        Q = np.empty((M, N), dtype=float)
+
     for i in range(N_REPS):
         start = time.perf_counter()
 
@@ -202,7 +205,8 @@ def TSQR(A_l):
                 Ys.append(Y_l_k)
 
         runtimes[i] = time.perf_counter() - start
-        Q = build_Q( Ys ) # just moved this out of timing
+        if i == N_REPS - 1:
+            Q = build_Q( Ys ) # just moved this out of timing
 
     tot_runtimes = None
     if RANK == 0:
@@ -253,6 +257,7 @@ def build_Q( Y_s ):
                 Q_k = block_diag(*subs_Q_k)
                 current_Q = Q_k @ current_Q
             # Gather assembles the object by sorting received data by rank  
+    new_comm.Free()
     return current_Q
 
 
@@ -281,12 +286,12 @@ if __name__ == '__main__':
     # Run your function with cProfile
     #cProfile.run('TSQR(mat_l)', 'output.prof')
     #if RANK ==0:
-# Load and sort the stats by cumulative time
+    # Load and sort the stats by cumulative time
     	#p = pstats.Stats('output.prof')
     	#p.strip_dirs().sort_stats('cumulative').print_stats(10)  # Prints the top 10 slowest parts
 
-    CQR(mat_l)
-    CGS(mat_l)
-    CGS(sing_mat_l)
+    #CQR(mat_l)
+    #CGS(mat_l)
+    #CGS(sing_mat_l)
     TSQR(mat_l)
     TSQR(sing_mat_l)
