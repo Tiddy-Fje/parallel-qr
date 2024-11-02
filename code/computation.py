@@ -3,6 +3,8 @@ import numpy as np
 from utils import *
 import time 
 import h5py
+import cProfile
+import pstats
 from scipy.linalg import solve_triangular, block_diag
 from scipy import sparse
 
@@ -12,8 +14,9 @@ RANK = COMM.Get_rank()
 N_PROCS = COMM.Get_size()
 LOGP_TOT = int_check(np.log2(N_PROCS))
 
-N_REPS = 5 # 5,10 -> To average the runtimes
-SAVE_RESULTS = True 
+N_REPS = 1 # 5,10 -> To average the runtimes
+SAVE_RESULTS = False 
+PROCS_FOR_STABILITY = 1
 
 # Problem set up 
 M = 32768 # 32768 2048
@@ -24,7 +27,7 @@ def std_print_results(max_runtimes, err_on_norm, Q_cond_number, ending):
         f.create_dataset(f'max_t_avg_{ending}', data=np.mean(max_runtimes))
         f.create_dataset(f'max_t_std_{ending}', data=np.std(max_runtimes))
         f.create_dataset(f'n_rep_{ending}', data=N_REPS)
-        if ending[:3] == 'CGS' and N_PROCS == 1: # store the vectors instead of the scalars
+        if ending[:3] == 'CGS' and N_PROCS == PROCS_FOR_STABILITY: # store the vectors instead of the scalars
             f.create_dataset(f'errs_on_norm_{ending}', data=err_on_norm)
             f.create_dataset(f'Q_cond_numbers_{ending}', data=Q_cond_number)
             err_on_norm = err_on_norm[-1]
@@ -90,7 +93,7 @@ def CGS_metrics(Q):
     Q : np.array
         The matrix Q from the QR decomposition.
     '''
-    if N_PROCS != 1:
+    if N_PROCS != PROCS_FOR_STABILITY:
         norm_error, cond_number =  metrics_from_Q(Q)
         return norm_error, cond_number
     
@@ -186,12 +189,14 @@ def TSQR(A_l):
             # only keep needed processors 
             if not (RANK % 2**q == 0):
                 continue
+            #print('Rank', RANK, ': q=', q)
             j = get_partner_idx(RANK, q)
             if RANK > j:
                 COMM.Send(R_l_kp1, dest=j)
             else:
                 R_j_kp1 = np.empty(R_l_kp1.shape, dtype=float)
                 COMM.Recv(R_j_kp1, source=j)
+                #print('Rank', RANK, ': hey')
                 Y_l_k, R_l_k = np.linalg.qr(np.concatenate((R_l_kp1,R_j_kp1), axis=0), mode='reduced')
                 R_l_kp1 = R_l_k
                 Ys.append(Y_l_k)
@@ -272,8 +277,16 @@ if __name__ == '__main__':
     mat_l = [mat_l, 'mat']
     sing_mat_l = [sing_mat_l, 'sing_mat']
 
-    CQR(mat_l)
-    CGS(mat_l)
-    CGS(sing_mat_l)
-    TSQR(mat_l)
-    TSQR(sing_mat_l)
+
+    # Run your function with cProfile
+    cProfile.run('TSQR(mat_l)', 'output.prof')
+
+    # Load and sort the stats by cumulative time
+    p = pstats.Stats('output.prof')
+    p.strip_dirs().sort_stats('cumulative').print_stats(10)  # Prints the top 10 slowest parts
+
+    #CQR(mat_l)
+    #CGS(mat_l)
+    #CGS(sing_mat_l)
+    #TSQR(mat_l)
+    #TSQR(sing_mat_l)

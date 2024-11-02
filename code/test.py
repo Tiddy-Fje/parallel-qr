@@ -1,9 +1,17 @@
-from mpi4py import MPI
 import numpy as np
 
-a = np.array([1])
-b = np.array([4])
-print(a@b)
+# create a random normal matrix
+m = 32768
+n = 330
+A = np.random.randn(m, n)
+# normalize the columns
+A /= np.linalg.norm(A, axis=0)
+I = np.eye(n)
+
+
+err_on_norm = np.linalg.norm( A.T @ A - I )
+print(err_on_norm)
+
 '''
 
 def get_partner_idx( rank:int, log_sample:int ) -> int:

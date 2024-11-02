@@ -19,156 +19,106 @@
 	    \small{Fall 2024}
 	\end{center}
 	\section{Introduction}
-	QR factorization is a fundamental operation in numerical linear algebra. It is used in many applications, such least squares problems, computing the low rank approximation of a matrix, and computing an orthogonal basis of a set of vectors. It is defined as the factorization of a matrix $\mathbf{A}\in \mathbb{R}^{m \times n}$ into the product of an orthogonal matrix $\mathbf{Q}\in \mathbb{R}^{m \times n}$ and an upper triangular matrix $\mathbf{R}\in \mathbb{R}^{n \times n}$, such that $\mathbf{A} = \mathbf{Q} \mathbf{R}$. The QR factorization can be computed using different algorithms, such as Classical Gram-Schmidt (CGS), Cholesky-QR, and Tall-Skinny QR (TSQR). These algorithms have different numerical properties and computational costs, which makes them suitable for different applications. In this project, we study the numerical stability and computational performance of these algorithms for orthogonalizing a set of vectors. We will compare the algorithms using theoretical analysis and numerical experiments on different matrices. The goal is to identify an algorithm that is numerically stable and computationally efficient for orthogonalizing a set of vectors.
+	QR factorization is a fundamental operation in numerical linear algebra. It is used in many applications, such least squares problems, computing the low rank approximation of a matrix, and computing an orthogonal basis of a set of vectors. Its ``thin'' $Q$ version is defined as the factorization of a matrix ${A}\in \mathbb{R}^{m \times n}$ into the product of an orthogonal matrix ${Q}\in {R}^{m \times n}$ and an upper triangular matrix ${R}\in \mathbb{R}^{n \times n}$, such that ${A} = {Q} {R}$. The QR factorization can be computed using different algorithms, such as Classical Gram-Schmidt (CGS), Cholesky-QR, and Tall-Skinny QR (TSQR). These algorithms have different numerical properties and computational costs, which makes them suitable for different applications. In this project, we study the numerical stability and computational performance of these algorithms for orthogonalizing a set of vectors. We compare the algorithms using theoretical analysis and numerical experiments on two different matrices : a well conditioned one, and an ill-conditioned one. The goal is to identify an algorithm that is numerically stable and computationally efficient for orthogonalizing a set of vectors.
 
-	In this project we make the assumption that $m \gg n$ and consider a couple of different forms for the $\mathbf{A}$ matrix. Typically we take $n$ between 50 and a few hundreds, while $m$ can be much larger.
+	In this project we consider $m \gg n$ and typically take $n$ between 50 and a few hundreds, while $m$ can be much larger.
 	\section{Algorithms}
 		\subsection{Classical Gram-Schmidt}
-			Given a set of linearly independent vectors $\mathbf{a}_1, \ldots, \mathbf{a}_n \in \mathbb{R}^m$, the Gram-Schmidt algorithm computes an orthogonal basis $\mathbf{q}_1, \ldots, \mathbf{q}_n \in \mathbb{R}^m$ by orthogonalizing the vectors one by one. At the step $i$ of the algorithm, the $i$th vector $a_j$ is projected onto the orthogonal complement of the space spanned by the previous vectors $\mathbf{q}_1, \ldots, \mathbf{q}_{i-1}$, and the resulting vector is normalized to obtain $\mathbf{q}_i$.
+			Given a set of linearly independent vectors $A_1, \ldots, A_n \in \mathbb{R}^m$, the Gram-Schmidt algorithm computes an orthogonal basis $Q_1, \ldots, Q_n \in \mathbb{R}^m$ by orthogonalizing the vectors one by one. At the step $i$ of the algorithm, the $i$th vector $a_j$ is projected onto the orthogonal complement of the space spanned by the previous vectors $Q_1, \ldots, Q_{i-1}$, and the resulting vector is normalized to obtain $Q_i$.
 
 			CGS is obtained by approximating the projector $I-Q(:,1:i)Q^\dagger(:,1:i)$ by $I-Q(:,1:i)Q^T(:,1:i)$. This corresponds to assuming $[Q(:,1:i)^TQ(:,1:i)]^{-1}=I$, i.e. that no numerical errors are committed during the orthogonalisation process. 
 		\subsection{Cholesky-QR}
-			The Cholesky-QR algorithm consists in computing $Q=AR^{-1}$ with $R$ found with help of the Cholesky decomposition of $A^TA$. The Cholesky decomposition of a matrix $\mathbf{G}$ is a factorization of the form $\mathbf{G} = \mathbf{L} \mathbf{L}^T$, where $\mathbf{L}$ is a lower triangular matrix. Indeed, the Cholesky decomposition $A^TA=LL^T$ gives $R=L^T$ since $(QR)^T(QR)=R^TR\iff Q^TQ=I$. 
+			The Cholesky-QR algorithm consists in computing $Q=AR^{-1}$ with $R$ found with help of the Cholesky decomposition of $A^TA$. The Cholesky decomposition of a matrix ${G}$ is a factorization of the form ${G} = {L} {L}^T$, where ${L}$ is a lower triangular matrix. Indeed, the Cholesky decomposition $A^TA=LL^T$ gives $R=L^T$ since $(QR)^T(QR)=R^TR\iff Q^TQ=I$. 
 			
-			Notice that in practice, instead of inverting $R$ we can solve the system $R^TQ^T=A^T$ taking advantage of the triangular structure of $R$.
+			Notice that in practice, instead of inverting $R$ we can solve for each column of $A^T$ the system associated to $R^TQ^T=A^T$ taking advantage of the triangular structure of $R$.
 		\subsection{TSQR}
-		% "explain why it minimizes communication,state the reduction tree used, state the algebra and the dimensions of intermediate Q factors."
 		%Remember that communication refers to messages between processors. In the recent years we've seen trends causing floating point to become faster than communication. This is why it's important to minimize communication when dealing with parallelism.
 		The TSQR, ``Tall Skinny QR'' algorithm is a communication avoiding algorithm for matrices with many more rows than columns. 
-		To better understand how it works, we first explain it assuming we were using P = 4 processors, therefore scattering row wise our matrix $A$ along 4 processors $A_1, A_2, A_3, A_4 \in \mathbb{R}^{m / 4 \times n}$. We will then discuss how to go from this specific case to the more general one. 
+		To better understand how it works, we first explain it assuming we were using P = 4 processors, therefore scattering row wise our matrix $A$ along 4 processors $A_1, A_2, A_3, A_4 \in \mathbb{R}^{m / 4 \times n}$. We will then explain how to generalise to the more general case. 
 		
 		The computation can be expressed as a product of intermediate orthonormal factors in a binary tree like structure.
 
-		At the leaves of the binary tree, we perform in parallel 4 local QR factorizations to get $A_1=\hat{Q}_1^{(2)} \hat{R}_1^{(2)}, A_2=\hat{Q}_2^{(2)} \hat{R}_2^{(2)}, A_3=\hat{Q}_3^{(2)} \hat{R}_3^{(2)}, A_4=\hat{Q}_4^{(2)} \hat{R}_4^{(2)}$. Here $\hat{Q}_l^{(2)} \in \mathbb{R}^{m / 4 \times m / 4}$ and $\hat{R}_l^{(2)} \in \mathbb{R}^{m / 4 \times n}$. In block structure we get
+		At the leaves of the binary tree, we perform in parallel 4 local QR factorizations to get $A_1=\hat{Q}_1^{(2)} \hat{R}_1^{(2)}, A_2=\hat{Q}_2^{(2)} \hat{R}_2^{(2)}, A_3=\hat{Q}_3^{(2)} \hat{R}_3^{(2)}, A_4=\hat{Q}_4^{(2)} \hat{R}_4^{(2)}$. Here $\hat{Q}_l^{(2)} \in \mathbb{R}^{m / 4 \times m / 4}$ and $\hat{R}_l^{(2)} \in \mathbb{R}^{m / 4 \times n}$. As we only are interested in the thin $Q$ factor for this application, we can work with the $Q_i^{(k)}\in\mathbb R^{m/4\times n}, R_i^{(k)}\in\mathbb R^{n\times n}$ instead of the full $\hat Q_i^{(k)}, \hat R_i^{k}$ ones. In block structure we therefore get
 		$$
 		\left[\begin{array}{l}
+		A_0 \\
 		A_1 \\
 		A_2 \\
-		A_3 \\
-		A_4
+		A_3
 		\end{array}\right]=\left[\begin{array}{llll}
-		\hat{Q}_1^{(2)} & & & \\
-		& \hat{Q}_2^{(2)} & & \\
-		& & \hat{Q}_3^{(2)} & \\
-		& & & \hat{Q}_4^{(2)}
+		{Q}_0^{(2)} & & & \\
+		& {Q}_1^{(2)} & & \\
+		& & {Q}_2^{(2)} & \\
+		& & & {Q}_3^{(2)}
 		\end{array}\right]\left[\begin{array}{l}
-		\hat{R}_1^{(2)} \\
-		\hat{R}_2^{(2)} \\
-		\hat{R}_3^{(2)} \\
-		\hat{R}_4^{(2)}
+		{R}_0^{(2)} \\
+		{R}_1^{(2)} \\
+		{R}_2^{(2)} \\
+		{R}_3^{(2)}
 		\end{array}\right]
 		$$
-
-		Recall that $\hat{R}_l^{(2)} \in \mathbb{R}^{m / 4 \times n}$ are tall and skinny upper triangular matrices, hence they can be written as
-		$$
-		\hat{R}_l^{(2)}=\left[\begin{array}{c}
-		R_l^{(2)} \\
-		0
-		\end{array}\right]
-		$$
-
-		where $R_l^{(2)} \in \mathbb{R}^{n \times n}$. In the second level of the binary tree we combine the upper triangular matrices $R_1^{(2)}$ with $R_2^{(2)}$ and $R_3^{(2)}$ with $R_4^{(2)}$ to get block structured matrices. We perform the QR factorization in parallel to get the following structured matrices
-
+		In the second level of the binary tree we combine the upper triangular matrices $R_0^{(2)}$ with $R_1^{(2)}$ and $R_2^{(2)}$ with $R_3^{(2)}$ to get block structured matrices. We perform the QR factorization in parallel to get $Q_{00}^{(1)},Q_{10}^{(1)},R_0^{(1)},Q_{22}^{(1)},Q_{32}^{(1)},R_2^{(1)}$ such that
 		$$
 		\left[\begin{array}{c}
-		R_1^{(2)} \\
-		R_{(2)}^{(2)}
-		\end{array}\right]=\left[\begin{array}{cc}
-		\hat{Q}_{11}^{(1)} & \hat{Q}_{12}^{(1)} \\
-		\hat{Q}_{21}^{(1)} & \hat{Q}_{22}^{(2)}
-		\end{array}\right]\left[\begin{array}{c}
-		R_1^{(1)} \\
-		0
-		\end{array}\right] \quad\left[\begin{array}{l}
-		R_3^{(2)} \\
-		R_{(4)}^{(2)}
-		\end{array}\right]=\left[\begin{array}{ll}
-		\hat{Q}_{33}^{(1)} & \hat{Q}_{34}^{(1)} \\
-		\hat{Q}_{43}^{(1)} & \hat{Q}_{44}^{(2)}
-		\end{array}\right]\left[\begin{array}{c}
-		R_3^{(1)} \\
-		0
-		\end{array}\right] .
+		R_0^{(2)} \\
+		R_1^{(2)}
+		\end{array}\right]=\left[\begin{array}{c}
+		{Q}_{00}^{(1)} \\
+		{Q}_{10}^{(1)} 
+		\end{array}\right]
+		R_0^{(1)} 
+		\quad\left[\begin{array}{c}
+		R_2^{(2)} \\
+		R_3^{(2)}
+		\end{array}\right]=\left[\begin{array}{c}
+		{Q}_{22}^{(1)} \\
+		{Q}_{32}^{(1)}
+		\end{array}\right]
+		R_3^{(1)}.
 		$$
-		
 		This can be written as
 		$$
 		\left[\begin{array}{c}
-		\hat{R}_1^{(2)} \\
-		\hat{R}_2^{(2)} \\
-		\hat{R}_3^{(2)} \\
-		\hat{R}_4^{(2)}
-		\end{array}\right]=\left[\begin{array}{cccccccc}
-		\hat{Q}_{11}^{(1)} & & \hat{Q}_{12}^{(1)} & & & & & \\
-		& I & & & & & & \\
-		\hat{Q}_{21}^{(1)} & & \hat{Q}_{22}^{(1)} & & & & & \\
-		& & & I & & & & \\
-		& & & & \hat{Q}_{33}^{(1)} & & \hat{Q}_{34}^{(1)} & \\
-		& & & & & I & & \\
-		& & & & \hat{Q}_{43}^{(1)} & & \hat{Q}_{44}^{(1)} & \\
-		& & & & & & & I
+		{R}_0^{(2)} \\
+		{R}_1^{(2)} \\
+		{R}_2^{(2)} \\
+		{R}_3^{(2)}
+		\end{array}\right]=\left[\begin{array}{ccc}
+			{Q}_{00}^{(1)} & & \\
+			{Q}_{10}^{(1)} & & \\
+			& & {Q}_{22}^{(1)} \\
+			& & {Q}_{32}^{(1)} 
 		\end{array}\right]\left[\begin{array}{c}
-		R_1^{(1)} \\
-		0 \\
-		R_3^{(1)} \\
-		0
-		\end{array}\right] .
+		R_0^{(1)} \\
+		R_2^{(1)}
+		\end{array}\right].
 		$$
-		
 		Finally at the root of the tree we compute the last QR factorization
 		$$
 		\left[\begin{array}{c}
-		R_1^{(1)} \\
-		R_3^{(1)}
-		\end{array}\right]=\left[\begin{array}{ll}
-		\hat{Q}_{11}^{(0)} & \hat{Q}_{13}^{(0)} \\
-		\hat{Q}_{31}^{(0)} & \hat{Q}_{33}^{(0)}
-		\end{array}\right]\left[\begin{array}{c}
-		R_1^0 \\
-		0
+		R_0^{(1)} \\
+		R_2^{(1)}
+		\end{array}\right]=\left[\begin{array}{c}
+			{Q}_{00}^{(0)} \\
+			{Q}_{20}^{(0)}
 		\end{array}\right]
+		R_0^{(0)}
 		$$
+		After all this, one can write ${Q}=Q^{(2)}Q^{(1)}Q^{(0)}$.
 
+		In the more general case, where $A$ is distributed over $2^P$ processors, we would have $P+1$ levels in the binary tree. The $Q^{(P)}$ matrix would still be block diagonal, but with $P$ blocks of size $m/P\times n$. The other $Q^{(q)}, q=P-1,...,0$ matrices would also be block diagonal, composed of $2^q$ blocks, each of size $2n\times n$. 
+		The reduction tree used was obtained with the following procedure at every stage $q$ :
+		(a) processors $i$ such that $i\mod 2^{P-q}=0$ are kept active; (b) processor $j$ for which $j\mod 2^{P-q+1}=1$ sends its data to processor $i=j-2^{P-q}$; (c) processor $i$ receives data from processor $j=i+2^{P-q}$. This method nicely generalises the reduction tree used in the 4 processor example. 
 
-		Which can be written as
-
-		$$
-		\left[\begin{array}{c}
-		R_1^{(1)} \\
-		0 \\
-		R_{(3)}^{(1)} \\
-		0
-		\end{array}\right]=\left[\begin{array}{llll}
-		\hat{Q}_{11}^{(0)} & & \hat{Q}_{13}^{(0)} & \\
-		& I & & \\
-		\hat{Q}_{31}^{(0)} & & \hat{Q}_{33}^{(0)} & \\
-		& & & I
-		\end{array}\right]\left[\begin{array}{c}
-		R_1^{(0)} \\
-		0 \\
-		0 \\
-		0
-		\end{array}\right] .
-		$$
-
-		$\hat{Q}$ is represented implicitly as the product of the intermediate orthogonal matrices as ${\hat Q}={\hat Q}^{(2)}{\hat Q}^{(1)}{\hat Q}^{(0)}$.
-
-		In the more general case, where $A$ is distributed over $2^q$ processors, we would have $q+1$ levels in the binary tree. The matrix $Q^{(k)}$ associated to level $k$ would be composed of $2^{q-k}$ blocks of size $m/2^{q-k} \times m/2^{q-k}$, with structure 
-		$$
-		\left[\begin{array}{llll}
-		\hat{Q}_{ij}^{(k)} & & \hat{Q}_{ij}^{(k)} & \\
-		& I & & \\
-		\hat{Q}_{ji}^{(k)} & & \hat{Q}_{jj}^{(k)} & \\
-		& & & I
-		\end{array}\right].
-		$$
-		Notice the communication is minimal as no data is duplicated and the reduction tree is used to combine the results of the local QR factorizations.
+		Notice that TSQR's communication is minimal as no data is duplicated and the reduction tree is used to combine the results of the local QR factorizations.
 	\section{Parallelisation}
-		For the parallelization, the matrix $\mathbf{A}$ is  row-distributed among processors. Each processor $i$ owns a block $\mathbf{A}_i$ with $i=1:n_{\text{procs}}$ (resp. $i=0:n_{\text{procs}}-1$ in \texttt{python}).
-
+		For parallelization of all the considered algorithms, the matrix ${A}$ is row-distributed over the processors. Each processor $i=0,...,P-1$ owns a block ${A}_i$.
+		
+		In the following sections, parallel versions of the considered algorithms are presented. This is done with help of the pseudo-codes provided by the professor during the lectures.
 		%For each algorithm you should give their pseudo-code and explain it. You should also explain the communication routines used and why they are used. 
 		\subsection{Classical Gram-Schmidt}
-			In parallel CGS we split the projection of the $i$th vector across the processors. This however requires an allreduce operation as the projection involves the full columns of $Q$. The norm of the obtained projection is also all-reduced to compute the normalization factor, which is needed across processors. The pseudocode is given in \ref{fig:CGS-pseudocode}.   
+			The pseudocode for parallel CGS is given in \ref{fig:CGS-pseudocode}.   
+			Parallel CGS splits the projection of the $i$th vector across the processors. This requires an Allreduce operation for every column, as the projection involves the full columns of $Q$. Indeed, to know how well two vectors align, one should sum their alignments (i.e. dot product) in every subspace. The norm of the obtained projection is also all-reduced to compute the normalization factor, which is needed across processors. After the loop is done, the final $Q$ matrix is obtained by a Gather operation.
 			\begin{figure}[htb]       
 				\centering             
 					\vspace{0em}
@@ -177,6 +127,8 @@
 					\label{fig:CGS-pseudocode}
 			\end{figure}
 		\subsection{Cholesky-QR}
+			The pseudocode for parallel Cholesky-QR is given in \ref{fig:Cholesky-QR-pseudocode}.
+			Parallel Cholesky-QR computes on every processor the $n\times n$ component $A_i^TA_i$ of $A^TA$. This is done by computing the local $A_i^TA_i$ and then summing the results with an Allreduce operation. The Cholesky decomposition is then computed on every processor as it is on a $n\times n$ matrix, and we want to limit unnecessary communication. The contribution $Q_i$ of processor $i$ to the $Q$ matrix is then computed by solving the system $R^TQ_i^T=A_i^T$. The final result is obtained by a Gather operation. 
 			\begin{figure}
 				\centering
 				\includegraphics[width=.7\textwidth]{cholesky_QR_pseudocode}
@@ -184,6 +136,8 @@
 				\label{fig:Cholesky-QR-pseudocode}
 			\end{figure}
 		\subsection{TSQR}
+			The pseudocode for TSQR is given in \ref{fig:TSQR-pseudocode}.
+			TSQR was mostly explained already in the previous section. We might add that the reconstruction of the $Q$ matrix is done a posteriori by building the $Q^{(k)}$ matrices going up the binary tree and multiplying it by the trailing $Q^{(k-1)\leftarrow(0)}$ matrix. 
 			\begin{figure}
 				\centering
 				\includegraphics[width=.8\textwidth]{TSQR_pseudocode}
@@ -192,57 +146,94 @@
 			\end{figure}
 	
 	\section{Experimental procedure}
-		For a theoretical investigation, the bounds on the loss of orthogonality provided in the lectures should be used. For the numerical investigation, you should provide plots measuring the loss of orthogonality as $\left\|I-Q^T Q\right\|_2$ and the condition number of the basis $Q$. When it is possible, these quantities, along with the condition number of the input vectors, should be provided at each iteration of the algorithm when a new vector is orthogonalized. However this will not be possible for Cholesky-QR or TSQR for example. In this case you should present only the results obtained at the end of the algorithm.
+		For all the presented results, we used $m=2^{15}=32768$ and $n=330$, unless stated otherwise. This choice was based on the fact that we wanted the computations of the metrics to take a reasonable time, while providing the algorithms with a sufficiently large matrix for the run times not to have too high of a variance.	
 
-		This investigation should be done on at least two different matrices. One of these matrices will be generated by uniformly discretizing a parametric function, also used in [1], that we denote $C \in \mathbb{R}^{m \times n}$. For all floating (and thus rational) numbers $0 \leq x, \mu \leq 1$, the function is defined as
+		For a theoretical investigation, the bounds on the loss of orthogonality provided in the lectures should be used. 
+		\subsection{Chosen Matrices}
+			The singular matrix, which we denote $C \in \mathbb{R}^{m \times n}$ was was generated by uniformly discretizing the following parametric function
+			$$
+			f(x, y)=\frac{\sin (10(y+x))}{\cos (100(y-x))+1.1}
+			$$
+			over the $0 \leq x, y \leq 1$ domain.
+
+			The non singular matrix was obtained from the SuiteSparse Matrix Collection, https: //sparse.tamu.edu/about. More precisely, the ..., $k\times l$ ???  matrix was used. To make it $m\times n$, its first $m$ lines and $n$ columns were kept. 
+		\subsection{Numerical Stability}
+			For the numerical investigation, the loss of orthogonality is measured as $\left\|I-Q^T Q\right\|_2$ and the condition number of the basis $Q$. Indeed, the condition number of the basis $Q$ is also a measure of orthogonality since it is defined as the ratio of the largest and smallest singular values $\sigma_{\max{}},\sigma_{\min}$ of $Q$ and orthogonal matrices should have $|\sigma_i|=1\ \forall i$. 
 		
-		$$
-		f(x, \mu)=\frac{\sin (10(\mu+x))}{\cos (100(\mu-x))+1.1}
-		$$
-		
-		and the associated matrix is
-		
-		$$
-		C \in \mathbb{R}^{m \times n}, \quad C(i, j)=f\left(\frac{i-1}{m-1}, \frac{j-1}{n-1}\right), i \in 1, \ldots, m, j \in 1, \ldots, n
-		$$
-		
-		
-		You could use for example $m=50000$ and $n=600$.
-		Other matrices could be obtained for example from the SuiteSparse Matrix Collection, https: //sparse.tamu.edu/about. You can pick any square matrix, and then select only the first columns. The dimensions of the test matrices should be chosen such that you can compute the required quantities.
-		
+			In general, these quantities where considered at the end of the algorithm. For CGS, however, as it is possible, an analysis of these quantities' evolution over the iterations of the algorithm when was also led.
+
+			As Cholesky QR could not be run on big $C$ matrices due to numerical stability issues, we studied its behaviour as a function of matrix size for smaller sizes. This was done by considering the $C_s=C(m=2000s,5s)$ matrix for values of $s$ between 1 and 30, which made the condition number of $C_s$ vary from $10^1$ to $10^7$.
+		\subsection{Runtimes}
+			The run times where obtained by timing each processor $i$, and then taking the $\max{}$ over the processors. To quantify uncertainty and get a more accurate estimate, the run times were measured by repeating the computations $n_{\text{rep}}=5$ times.
+			During the run time measurements, the number of processors was taken as powers of 2 between 1 and 64.
+				
 		Your report should state the theoretical bounds for the loss of orthogonality of the three algorithms. You should explain why these measures are important. For each matrix you should plot or put in a table the loss of orthogonality/condition number. You should explain these plots, reference them, and make connection with the theory.
 	\section{Numerical Stability Investigation}
+		\subsection{As a function of $n$}
+		\begin{wrapfigure}[32]{r}{0.525\textwidth}
+			\vspace{-1em}
+			\centering
+			\includegraphics[width=.5\textwidth]{CGS_metric_evolution}
+			\caption{Pseudocode of parallelised TSQR algorithm.}
+			\label{fig:CGS-metric-evolution}
+		\end{wrapfigure}
+		The first thing we explore is the behaviour of the loss of orthogonality and condition number of the $Q$ matrix as a function of the number $n$ of vectors that are on the orthogonal basis. To do this, the metrics are computed for $n$ between 1 and 330, and the results are plotted on semi-log plots in \ref{fig:CGS-metric-evolution}.
+
+		Looking at these plots, we see that both metrics explode for the singular matrix as a function on $n$. The loss of orthogonality actually behaves exponentially for small values of $n$ (i.e. up to $\sim 50$ or so), before plateauing at around 10. Both these behaviours can be understood as follows. (1.) The $n$th added vector needs to be orthogonal to $n-1$ other ones, and so contributes to $n-1$ numerical errors. (2.) The vectors are normed to $1$ and so the loss of orthogonality plateaus to a value characteristic of a random matrix under the same constraint. 
+
+		The condition number has a more surprising curve. Indeed, there seem to be some really small plateaus whose structure repeats periodically with period $\sim 40$. I was not able to come up with a good explanation for this behaviour. Another interesting point to notice is that the condition number starts to increase only once the loss of orthogonality has exploded. This was, at least partly expected, as singular values of an orthogonal matrix are 1. 
+		%\lipsum[1-4]
+		\subsection{Algorithm comparison}
+		We now compare the three algorithms between them. We do so by considering the loss of orthogonality and $Q$'s condition number at the end of the computation. The results are presented in \ref{tab:numberical-stability}.
+
+		As a quick look to the table confirms, the observed behaviours are the expected ones. For the well conditioned matrix, all algorithms perform well, yielding a perfect condition number, and a loss of orthogonality of the order of machine precision. For the ill-conditioned matrix : TSQR perform just as well, as it is unconditionally stable; CGS fails, as the $Q$ matrix has a condition number of order $10^{15}$, and saturates the loss of orthogonality; while Cholesky QR runs into a fatal error, as it perceives the matrix as a singular one.
+		
+		From this analysis, we can conclude that TSQR is the only algorithm one should use if the matrix is ill-conditioned. For well-conditioned matrices, all algorithms are accurate.  
+		\begin{table}[h]
+			\centering
+			\begin{tabular}{|c|l|c|c|c|}
+			\hline
+			Metric                            & Matrix Type & Cholesky QR & Classical Gram-Schmidt & Tall-skinny     \\ \hline
+			\multirow{2}{*}{$\|I-Q^TQ\|$} & $\kappa(A)=1.984\times 10^{4}$  & 4.153$\times 10^{-15}$ & 3.350$\times 10^{-15}$ & 5.550$\times 10^{-15}$ \\ \cline{2-5} 
+											  & $\kappa(A)=3.883\times 10^{15}$ & Error & 1.991$\times 10^{2}$ & 8.255$\times 10^{-15}$ \\ \hline
+			\multirow{2}{*}{$\kappa(Q)$} & $\kappa(A)=1.984\times 10^{4}$  & 1 & 1 & 1 \\ \cline{2-5} 
+											  & $\kappa(A)=3.883\times 10^{15}$ & Error & 7.572$\times 10^{15}$ & 1 \\ \hline
+			\end{tabular}
+			\caption{Metrics for numerical stability of the considered algorithms. The entry for the ill-conditioned matrix and Cholesky QR is marked as ``Error'' as the algorithm could not be run. Indeed, in this case the matrix was perceived as singular.}
+			\label{tab:numberical-stability}
+			\end{table}
+			\subsection{Cholesky QR's stability : a deep dive}
+			\begin{wrapfigure}[18]{r}{0.5\textwidth}
+				\centering
+				\includegraphics[width=.5\textwidth]{CQR_stability}
+				\caption{Loss of orthogonality of the $Q$ matrix obtained by Cholesky QR as a function of input-matrix condition number.}
+				\label{fig:CQR-stability}
+			\end{wrapfigure}
+			To better understand the numerical stability issues that Cholesky QR runs into, we now turn to its behaviour as a function of $A$'s condition number. The associated results are presented in a log-log plot in \ref{fig:CQR-stability}.
+			Looking at the plot, we can see that the loss of orthogonality grows quadratically as a function of the condition number (the slope on a log-log plot is an exponent on a lin-lin plot). This observation is compatible with the theoretical prediction, as Cholesky QR makes use of the Cholesky decomposition of $A^TA$, which has condition number $\kappa(A^TA)=\kappa(A)^2$. This allows us to conclude that the algorithm will interpret matrices with a condition number above $10^8$ as if they where singular. ???
+			%To better understand the Your report should state the theoretical bounds for the loss of orthogonality of the three algorithms. You should explain why these measures are important. For each matrix you should plot or put in a table the loss of orthogonality/condition number. You should explain these plots, reference them, and make connection with the theory.
 	\section{Runtime Investigation}
-% Please add the following required packages to your document preamble:
-% \usepackage{multirow}
-\begin{table}[]
-	\centering
-	\begin{tabular}{|c|l|c|c|c|}
-	\hline
-	Metric                            & Matrix Type & Cholesky QR & Classical Gram-Schmidt & Tall-skinny     \\ \hline
-	\multirow{2}{*}{$\|I-Q^TQ\|$}    & Non-singular A  & 100$\times 10^1$       & 100$\times 10^1$ & 100$\times 10^1$ \\ \cline{2-5} 
-									  & Singular A      & 100$\times 10^1$       & 100$\times 10^1$ & 100$\times 10^1$ \\ \hline
-	\multirow{2}{*}{$\kappa(Q)$} & Non-singular A  & 100$\times 10^1$       & 100$\times 10^1$ & 100$\times 10^1$ \\ \cline{2-5} 
-									  & Singular A      & 100$\times 10^1$       & 100$\times 10^1$ & 100$\times 10^1$ \\ \hline
-	\end{tabular}
-	\caption{Metrics for numerical stability of the considered algorithms.}
-	\label{tab:numberical-stability}
-	\end{table}
+		\begin{wrapfigure}[32]{r}{0.5\textwidth}
+			\centering
+			\includegraphics[width=.5\textwidth]{runtime_vs_nprocs}
+			\caption{Pseudocode of parallelised TSQR algorithm.}
+			\label{fig:runtime-vs-nprocs-mat}
+		\end{wrapfigure}	
+		\lipsum[1-2]
+
 	\section{Conclusion}
 	\section*{Aknowledgements}
-	%	\subsection{Time variation}
-	%\section{Conclusion}
-	%\section{Appendix}
+	
 	\appendix
 		\section{Runtime Estimation}\label{appendix:runtime_estimation}
 		%\input{elasticity_discussion.tex}	
-	%\begin{figure}[htb]       % replace <line_nb> the with number of lines for the wrapping
+	%\begin{wrapfigure}[30]       % replace <line_nb> the with number of lines for the wrapping
 	%	\centering                                          % and <side> by r or l for right or left (position on the page)
 	%		\vspace{0em}
 	%		\includegraphics[width=\textwidth]{yields_vs_T_for_diff_t}
 	%		\caption{This is a caption}
 	%		\label{fig:yield_vs_T_for_diff_t}
-	%\end{figure}
+	%\end{wrapfigure}
 	%\medskip
 	%\titleformat*{\section}{\normalfont\large\bfseries}
 	%\printbibliography[heading=bibintoc,title={Bibliography}] 
