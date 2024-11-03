@@ -14,12 +14,14 @@ RANK = COMM.Get_rank()
 N_PROCS = COMM.Get_size()
 LOGP_TOT = int_check(np.log2(N_PROCS))
 
-N_REPS = 5 # 5,10 -> To average the runtimes
+N_REPS = 5+1 # 5,10 -> To average the runtimes
 SAVE_RESULTS = True
-PROCS_FOR_STABILITY = 1
-
-M = 2048 # 32768 2048 16384
-N = 20 # 330 20 128
+PROCS_FOR_STABILITY = 2
+# load stuff
+# srun -N nodenum -n ntasks python3 file.py
+M = 2**15 # 32768 2048 16384
+N = 330 # 330 20 128
+MODE = 'reduced'
 
 def std_print_results(max_runtimes, err_on_norm, Q_cond_number, ending):
     with h5py.File(f'../output/results_n-procs={N_PROCS}.h5', 'a') as f:
@@ -192,7 +194,7 @@ def TSQR(A_l):
         start = time.perf_counter()
 
         if N_PROCS == 1: # direct QR
-            Q, R = np.linalg.qr(A_l, mode='reduced')
+            Q, R = np.linalg.qr(A_l, mode=MODE)
             runtimes[i] = time.perf_counter() - start
             if i == N_REPS-1:
                 err_on_norm, Q_cond_number = metrics_from_Q(Q)
@@ -201,7 +203,7 @@ def TSQR(A_l):
                     std_print_results(runtimes, err_on_norm, Q_cond_number, ending)
             continue
         
-        Y_l_kp1, R_l_kp1 = np.linalg.qr(A_l, mode='reduced') 
+        Y_l_kp1, R_l_kp1 = np.linalg.qr(A_l, mode=MODE) 
         Ys = [Y_l_kp1]
         for q in range(LOGP_TOT): 
             # only keep needed processors 
@@ -210,6 +212,7 @@ def TSQR(A_l):
             j = get_partner_idx(RANK, q)
             if RANK > j:
                 COMM.Send(R_l_kp1, dest=j)
+                break
             else:
                 R_j_kp1 = np.empty(R_l_kp1.shape, dtype=float)
                 COMM.Recv(R_j_kp1, source=j)
@@ -280,22 +283,19 @@ if __name__ == '__main__':
     mat = None
     sing_mat = None
     if RANK == 0:
-        #mat = sparse.load_npz(f'../data/csr_{M}_by_{N}_other_mat.npz').toarray()
+        mat = sparse.load_npz(f'../data/csr_{M}_by_{N}_other_mat.npz').toarray()
         sing_mat = get_C(M,N)
 
     shape = (M//N_PROCS, N)
     mat_l = np.empty(shape, dtype=float)
     sing_mat_l = np.empty(shape, dtype=float)
-    #COMM.Scatter(mat, mat_l, root=0)
+    COMM.Scatter(mat, mat_l, root=0)
     COMM.Scatter(sing_mat, sing_mat_l, root=0)
 
-    #mat_l = [mat_l, 'mat']
+    mat_l = [mat_l, 'mat']
     sing_mat_l = [sing_mat_l, 'sing_mat']
 
-    #CQR(mat_l)
-    #CGS(mat_l)
-    CGS(sing_mat_l)
-    #Ys_mat, mat_lab_mat, max_runtimes_mat = TSQR(mat_l)
+    Ys_mat, mat_lab_mat, max_runtimes_mat = TSQR(mat_l)
     Ys_mat_sing, mat_lab_mat_sing, max_runtimes_mat_sing = TSQR(sing_mat_l)
     ## Run your function with cProfile
     #cProfile.run('TSQR(mat_l)', 'output.prof')
@@ -303,5 +303,9 @@ if __name__ == '__main__':
     ## Load and sort the stats by cumulative time
     #    p = pstats.Stats('output.prof')
     #    p.strip_dirs().sort_stats('cumulative').print_stats(10)  # Prints the top 10 slowest parts
-    #post_TSQR(Ys_mat, mat_lab_mat, max_runtimes_mat)
+    
+    CQR(mat_l)
+    CGS(mat_l)
+    CGS(sing_mat_l)
+    post_TSQR(Ys_mat, mat_lab_mat, max_runtimes_mat)
     post_TSQR(Ys_mat_sing, mat_lab_mat_sing, max_runtimes_mat_sing)
