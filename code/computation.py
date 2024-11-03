@@ -79,7 +79,7 @@ def CQR(A_l, stability=False):
     COMM.Gather(runtimes, tot_runtimes, root=0)
 
     if RANK == 0:
-        max_runtimes = np.max(tot_runtimes, axis=0) # max over all processors
+        max_runtimes = np.max(tot_runtimes[:,1:], axis=0) # max over all processors
         err_on_norm, Q_cond_number = metrics_from_Q(Q)
         if stability:
             return err_on_norm, Q_cond_number
@@ -158,7 +158,7 @@ def CGS(A_l):
 
     if RANK == 0:
         errs_on_norm, Q_cond_numbers = CGS_metrics(Q)
-        max_runtimes = np.max(tot_runtimes, axis=0) # max over all processors
+        max_runtimes = np.max(tot_runtimes[:,1:], axis=0) # max over all processors
         ending = f'CGS_{mat_lab}'
         if SAVE_RESULTS:
             std_print_results(max_runtimes, errs_on_norm, Q_cond_numbers, ending)
@@ -229,7 +229,7 @@ def TSQR(A_l):
         max_runtimes = np.empty(N_REPS, dtype=float)
     COMM.Gather(runtimes, tot_runtimes, root=0)
     if RANK == 0:
-        max_runtimes = np.max(tot_runtimes, axis=0) # max over all processors
+        max_runtimes = np.max(tot_runtimes[:,1:], axis=0) # max over all processors
     return Ys, mat_lab, max_runtimes
 
 
