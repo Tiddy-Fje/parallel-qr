@@ -13,6 +13,13 @@ err_on_norm = np.linalg.norm( A.T @ A - I )
 print(err_on_norm)
 
 '''
+Ideas 
+- memory messes up stuff
+- ???
+Solution 
+- externalise memory out of function and build later ??
+    - this way can build both matrices later
+    - makes further investigation easier
 
 def get_partner_idx( rank:int, log_sample:int ) -> int:
     idx = 0

@@ -18,8 +18,8 @@ N_REPS = 5 # 5,10 -> To average the runtimes
 SAVE_RESULTS = True
 PROCS_FOR_STABILITY = 1
 
-M = 32768 # 32768 2048
-N = 330 # 330 20
+M = 16384 # 32768 2048 16384
+N = 128 # 330 20 128
 
 def std_print_results(max_runtimes, err_on_norm, Q_cond_number, ending):
     with h5py.File(f'../output/results_n-procs={N_PROCS}.h5', 'a') as f:
@@ -170,20 +170,37 @@ def get_partner_idx( rank:int, k:int ) -> int:
         idx = rank - 2**k
     return idx
 
+def TSQR_routine(A_l):
+    Ys, mat_lab, max_runtimes = TSQR(A_l)
+
+    if Ys is not None:
+        Q = None
+        if RANK == 0:
+            Q = np.empty((M, N), dtype=float)
+        Q = build_Q(Ys)
+        if RANK == 0:
+            err_on_norm, Q_cond_number = metrics_from_Q(Q)
+            ending = f'TSQR_{mat_lab}'
+            if SAVE_RESULTS:
+                std_print_results(max_runtimes, err_on_norm, Q_cond_number, ending)
+
 
 def TSQR(A_l):
     A_l, mat_lab = A_l
     runtimes = np.empty(N_REPS)
-    Q = None
-    if RANK == 0:
-        Q = np.empty((M, N), dtype=float)
 
+    Ys = None
     for i in range(N_REPS):
         start = time.perf_counter()
 
         if N_PROCS == 1: # direct QR
             Q, R = np.linalg.qr(A_l, mode='reduced')
             runtimes[i] = time.perf_counter() - start
+            if i == N_REPS-1:
+                err_on_norm, Q_cond_number = metrics_from_Q(Q)
+                if SAVE_RESULTS:
+                    ending = f'TSQR_{mat_lab}'
+                    std_print_results(runtimes, err_on_norm, Q_cond_number, ending)
             continue
         
         Y_l_kp1, R_l_kp1 = np.linalg.qr(A_l, mode='reduced') 
@@ -192,33 +209,29 @@ def TSQR(A_l):
             # only keep needed processors 
             if not (RANK % 2**q == 0):
                 continue
-            #print('Rank', RANK, ': q=', q)
             j = get_partner_idx(RANK, q)
             if RANK > j:
                 COMM.Send(R_l_kp1, dest=j)
             else:
                 R_j_kp1 = np.empty(R_l_kp1.shape, dtype=float)
                 COMM.Recv(R_j_kp1, source=j)
-                #print('Rank', RANK, ': hey')
                 Y_l_k, R_l_k = np.linalg.qr(np.concatenate((R_l_kp1,R_j_kp1), axis=0), mode='reduced')
                 R_l_kp1 = R_l_k
                 Ys.append(Y_l_k)
 
         runtimes[i] = time.perf_counter() - start
-    Q = build_Q( Ys ) # just moved this out of timing
 
     tot_runtimes = None
+    max_runtimes = None
     if RANK == 0:
         tot_runtimes = np.empty((N_PROCS,N_REPS), dtype=float)
+        max_runtimes = np.empty(N_REPS, dtype=float)
     COMM.Gather(runtimes, tot_runtimes, root=0)
-
     if RANK == 0:
         max_runtimes = np.max(tot_runtimes, axis=0) # max over all processors
-        err_on_norm, Q_cond_number = metrics_from_Q(Q)
-        ending = f'TSQR_{mat_lab}'
-        if SAVE_RESULTS:
-            std_print_results(max_runtimes, err_on_norm, Q_cond_number, ending)
-    return 
+    return Ys, mat_lab, max_runtimes
+
+
 
 def get_right_mat_shape( p:int ):
     if p == 2 ** LOGP_TOT:
@@ -289,8 +302,8 @@ if __name__ == '__main__':
     	#p = pstats.Stats('output.prof')
     	#p.strip_dirs().sort_stats('cumulative').print_stats(10)  # Prints the top 10 slowest parts
 
-    #CQR(mat_l)
-    #CGS(mat_l)
-    #CGS(sing_mat_l)
-    TSQR(mat_l)
-    TSQR(sing_mat_l)
+    CQR(mat_l)
+    CGS(mat_l)
+    CGS(sing_mat_l)
+    TSQR_routine(mat_l)
+    TSQR_routine(sing_mat_l)
