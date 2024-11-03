@@ -170,9 +170,7 @@ def get_partner_idx( rank:int, k:int ) -> int:
         idx = rank - 2**k
     return idx
 
-def TSQR_routine(A_l):
-    Ys, mat_lab, max_runtimes = TSQR(A_l)
-
+def post_TSQR(Ys, mat_lab, max_runtimes):
     if Ys is not None:
         Q = None
         if RANK == 0:
@@ -305,5 +303,7 @@ if __name__ == '__main__':
     CQR(mat_l)
     CGS(mat_l)
     CGS(sing_mat_l)
-    TSQR_routine(mat_l)
-    TSQR_routine(sing_mat_l)
+    Ys_mat, mat_lab_mat, max_runtimes_mat = TSQR(mat_l)
+    Ys_mat_sing, mat_lab_mat_sing, max_runtimes_mat_sing = TSQR(sing_mat_l)
+    post_TSQR(Ys_mat, mat_lab_mat, max_runtimes_mat)
+    post_TSQR(Ys_mat_sing, mat_lab_mat_sing, max_runtimes_mat_sing)
