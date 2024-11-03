@@ -18,8 +18,8 @@ N_REPS = 5 # 5,10 -> To average the runtimes
 SAVE_RESULTS = True
 PROCS_FOR_STABILITY = 1
 
-M = 16384 # 32768 2048 16384
-N = 128 # 330 20 128
+M = 2048 # 32768 2048 16384
+N = 20 # 330 20 128
 
 def std_print_results(max_runtimes, err_on_norm, Q_cond_number, ending):
     with h5py.File(f'../output/results_n-procs={N_PROCS}.h5', 'a') as f:
@@ -280,30 +280,28 @@ if __name__ == '__main__':
     mat = None
     sing_mat = None
     if RANK == 0:
-        mat = sparse.load_npz(f'../data/csr_{M}_by_{N}_other_mat.npz').toarray()
+        #mat = sparse.load_npz(f'../data/csr_{M}_by_{N}_other_mat.npz').toarray()
         sing_mat = get_C(M,N)
 
     shape = (M//N_PROCS, N)
     mat_l = np.empty(shape, dtype=float)
     sing_mat_l = np.empty(shape, dtype=float)
-    COMM.Scatter(mat, mat_l, root=0)
+    #COMM.Scatter(mat, mat_l, root=0)
     COMM.Scatter(sing_mat, sing_mat_l, root=0)
 
-    mat_l = [mat_l, 'mat']
+    #mat_l = [mat_l, 'mat']
     sing_mat_l = [sing_mat_l, 'sing_mat']
 
-
-    # Run your function with cProfile
+    #CQR(mat_l)
+    #CGS(mat_l)
+    CGS(sing_mat_l)
+    #Ys_mat, mat_lab_mat, max_runtimes_mat = TSQR(mat_l)
+    Ys_mat_sing, mat_lab_mat_sing, max_runtimes_mat_sing = TSQR(sing_mat_l)
+    ## Run your function with cProfile
     #cProfile.run('TSQR(mat_l)', 'output.prof')
     #if RANK ==0:
-    # Load and sort the stats by cumulative time
-    	#p = pstats.Stats('output.prof')
-    	#p.strip_dirs().sort_stats('cumulative').print_stats(10)  # Prints the top 10 slowest parts
-
-    CQR(mat_l)
-    CGS(mat_l)
-    CGS(sing_mat_l)
-    Ys_mat, mat_lab_mat, max_runtimes_mat = TSQR(mat_l)
-    Ys_mat_sing, mat_lab_mat_sing, max_runtimes_mat_sing = TSQR(sing_mat_l)
-    post_TSQR(Ys_mat, mat_lab_mat, max_runtimes_mat)
+    ## Load and sort the stats by cumulative time
+    #    p = pstats.Stats('output.prof')
+    #    p.strip_dirs().sort_stats('cumulative').print_stats(10)  # Prints the top 10 slowest parts
+    #post_TSQR(Ys_mat, mat_lab_mat, max_runtimes_mat)
     post_TSQR(Ys_mat_sing, mat_lab_mat_sing, max_runtimes_mat_sing)
