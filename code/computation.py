@@ -205,8 +205,7 @@ def TSQR(A_l):
                 Ys.append(Y_l_k)
 
         runtimes[i] = time.perf_counter() - start
-        if i == N_REPS - 1:
-            Q = build_Q( Ys ) # just moved this out of timing
+    Q = build_Q( Ys ) # just moved this out of timing
 
     tot_runtimes = None
     if RANK == 0:
