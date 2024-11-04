@@ -1,16 +1,17 @@
 import numpy as np
-
+import time
 # create a random normal matrix
 m = 32768
 n = 330
-A = np.random.randn(m, n)
-# normalize the columns
-A /= np.linalg.norm(A, axis=0)
-I = np.eye(n)
+p = 1
+
+A = np.random.randn(m//p, n)
+start = time.time()
 
 
-err_on_norm = np.linalg.norm( A.T @ A - I )
-print(err_on_norm)
+Q,R = np.linalg.qr(A)
+end = time.time()
+print(f'Elapsed time: {end-start:.3e} seconds')
 
 '''
 Ideas 

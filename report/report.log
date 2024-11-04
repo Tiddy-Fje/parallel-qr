@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.24 (TeX Live 2022) (preloaded format=pdflatex 2022.7.21)  31 OCT 2024 17:24
+This is pdfTeX, Version 3.141592653-2.6-1.40.24 (TeX Live 2022) (preloaded format=pdflatex 2022.7.21)  4 NOV 2024 09:36
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -1068,6 +1068,73 @@ LaTeX Font Info:    Trying to load font information for U+msb on input line 22.
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 ) [1
 
-{c:/texlive/2022/texmf-var/fonts/map/pdftex/updmap/pdftex.map
-!pdfTeX error: pdflatex.exe (file c:/texlive/2022/texmf-var/fonts/map/pdftex/updmap/pdftex.map): fflush() failed (Invalid argument)
- ==> Fatal error occurred, no output PDF file produced!
+{c:/texlive/2022/texmf-var/fonts/map/pdftex/updmap/pdftex.map}] [2]
+<../figures//CGS_pseudocode.png, id=123, 796.47563pt x 499.36563pt>
+File: ../figures//CGS_pseudocode.png Graphic file (type png)
+<use ../figures//CGS_pseudocode.png>
+Package pdftex.def Info: ../figures//CGS_pseudocode.png  used on input line 137.
+(pdftex.def)             Requested size: 362.77264pt x 227.44792pt.
+<../figures//cholesky_QR_pseudocode.png, id=126, 861.71938pt x 341.77687pt>
+File: ../figures//cholesky_QR_pseudocode.png Graphic file (type png)
+<use ../figures//cholesky_QR_pseudocode.png>
+Package pdftex.def Info: ../figures//cholesky_QR_pseudocode.png  used on input line 146.
+(pdftex.def)             Requested size: 338.58632pt x 134.29373pt.
+<../figures//TSQR_pseudocode.png, id=128, 938.50626pt x 568.1225pt>
+File: ../figures//TSQR_pseudocode.png Graphic file (type png)
+<use ../figures//TSQR_pseudocode.png>
+Package pdftex.def Info: ../figures//TSQR_pseudocode.png  used on input line 156.
+(pdftex.def)             Requested size: 386.95897pt x 234.24072pt.
+ [3 <../figures//CGS_pseudocode.png>] [4 <../figures//cholesky_QR_pseudocode.png> <../figures//TSQR_pseudocode.png>]
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 204.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 204.
+
+<../figures//CGS_metric_evolution.png, id=145, 433.62pt x 722.7pt>
+File: ../figures//CGS_metric_evolution.png Graphic file (type png)
+<use ../figures//CGS_metric_evolution.png>
+Package pdftex.def Info: ../figures//CGS_metric_evolution.png  used on input line 208.
+(pdftex.def)             Requested size: 241.84843pt x 403.0882pt.
+[5] [6 <../figures//CGS_metric_evolution.png>]
+<../figures//CQR_stability.png, id=159, 433.62pt x 361.35pt>
+File: ../figures//CQR_stability.png Graphic file (type png)
+<use ../figures//CQR_stability.png>
+Package pdftex.def Info: ../figures//CQR_stability.png  used on input line 243.
+(pdftex.def)             Requested size: 266.03474pt x 221.70789pt.
+ [7 <../figures//CQR_stability.png>]
+<../figures//runtime_vs_nprocs.png, id=171, 433.62pt x 722.7pt>
+File: ../figures//runtime_vs_nprocs.png Graphic file (type png)
+<use ../figures//runtime_vs_nprocs.png>
+Package pdftex.def Info: ../figures//runtime_vs_nprocs.png  used on input line 260.
+(pdftex.def)             Requested size: 241.84843pt x 403.0882pt.
+ [8 <../figures//runtime_vs_nprocs.png>]
+Overfull \hbox (27.15388pt too wide) in paragraph at lines 284--288
+\OT1/cmr/m/n/12 lel and Dis-tributed Pro-cess-ing Sym-po-sium, May 2014, pp. 1159{1170. doi: 10.1109/IPDPS.2014.120. 
+ []
+
+[9] (./report.aux)
+Package rerunfilecheck Info: File `report.out' has not changed.
+(rerunfilecheck)             Checksum: 451C6226D6D20E0E4926F8CCA6246BD0;3317.
+Package logreq Info: Writing requests to 'report.run.xml'.
+\openout1 = `report.run.xml'.
+
+ ) 
+Here is how much of TeX's memory you used:
+ 44559 strings out of 478023
+ 1034852 string characters out of 5842667
+ 1888310 words of memory out of 5000000
+ 62347 multiletter control sequences out of 15000+600000
+ 478700 words of font info for 62 fonts, out of 8000000 for 9000
+ 1141 hyphenation exceptions out of 8191
+ 114i,13n,108p,1358b,891s stack positions out of 10000i,1000n,20000p,200000b,200000s
+<c:/texlive/2022/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb><c:/texlive/2022/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx8.pfb><c:/texlive/2022/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb><c:/texlive/2022/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi12.pfb><c:/texlive/2022/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb><c:/texlive/2022/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb><c:/texlive/2022/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb><c:/texlive/2022/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb><c:/texlive/2022/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb><c:/texlive/2022/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb><c:/texlive/2022/texmf-dist/fonts/type1/public/amsfonts/cm/cmti12.pfb><c:/texlive/2022/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt12.pfb><c:/texlive/2022/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb>
+Output written on report.pdf (9 pages, 1145021 bytes).
+PDF statistics:
+ 250 PDF objects out of 1000 (max. 8388607)
+ 199 compressed objects within 2 object streams
+ 42 named destinations out of 1000 (max. 500000)
+ 227 words of extra memory for PDF output out of 10000 (max. 10000000)
+

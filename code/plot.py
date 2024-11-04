@@ -8,6 +8,7 @@ import pandas as pd
 IN_PATH = '../output/'
 FIG_PATH = '../figures/'
 SHOW_PLOTS = False
+PROCS_FOR_STABILITY = 2
 
 # Problem set up 
 M = 32768 # 32768 2048
@@ -65,7 +66,7 @@ def import_data( ns_procs:np.array ):
 
         load_mat_runtimes(file, 'mat', CQR_data, CGS_data, TSQR_data)
         load_mat_runtimes(file, 'sing_mat', CQR_data, CGS_data, TSQR_data)
-        if n_procs == 1:
+        if n_procs == PROCS_FOR_STABILITY:
             load_mat_metrics(file, 'mat', data)
             load_mat_metrics(file, 'sing_mat', data)
 
@@ -138,12 +139,15 @@ def runtime_vs_nprocs(data):
     fig, ax = plt.subplots( 2, 1, figsize=(6, 10))
     algos = ['CGS', 'TSQR', 'CQR']
     for algo in algos:
+        factor = 1
+        if algo == 'TSQR':
+            factor = 2
         time_df = data[f't_df_{algo}']
         std_on_mean_mat = time_df[f'{algo}_std_t_mat'] / np.sqrt(time_df[f'{algo}_n_rep_mat'])
-        ax[0].errorbar(time_df['n_procs'], time_df[f'{algo}_avg_t_mat'], yerr=std_on_mean_mat, fmt='o', capsize=5, label=algo)
+        ax[0].errorbar(time_df['n_procs'], factor*time_df[f'{algo}_avg_t_mat'], yerr=std_on_mean_mat, fmt='o', capsize=5, label=algo)
         if algo != 'CQR':
             std_on_mean_sing_mat = time_df[f'{algo}_std_t_sing_mat'] / np.sqrt(time_df[f'{algo}_n_rep_sing_mat'])
-            ax[1].errorbar(time_df['n_procs'], time_df[f'{algo}_avg_t_sing_mat'], yerr=std_on_mean_sing_mat, fmt='o', capsize=5, label=algo)
+            ax[1].errorbar(time_df['n_procs'], factor*time_df[f'{algo}_avg_t_sing_mat'], yerr=std_on_mean_sing_mat, fmt='o', capsize=5, label=algo)
     
     ax[0].set_xlabel('Number of processors')
     ax[1].set_xlabel('Number of processors')

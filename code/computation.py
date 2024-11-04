@@ -15,7 +15,7 @@ N_PROCS = COMM.Get_size()
 LOGP_TOT = int_check(np.log2(N_PROCS))
 
 N_REPS = 5+1 # 5,10 -> To average the runtimes
-SAVE_RESULTS = True
+SAVE_RESULTS = False
 PROCS_FOR_STABILITY = 2
 # load stuff
 # srun -N nodenum -n ntasks python3 file.py
